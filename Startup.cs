@@ -67,11 +67,9 @@ namespace dotnet_core_api
 
             app.UseAuthorization();
 
-            // Esto mapea todos los controladores
-            // que tengan esta anotacion [Route("[controller]")]            
             app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
+            {   
+                endpoints.MapControllers();                
             });
         }
     }
