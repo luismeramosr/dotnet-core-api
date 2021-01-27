@@ -12,17 +12,19 @@ namespace dotnet_core_api.Models
             Orders = new HashSet<Order>();
         }
 
-        public int Id { get; set; }
+        public uint Id { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
-        public int RoleId { get; set; }
+        public uint RoleId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Address { get; set; }
+        public int? ZipCode { get; set; }
         public string Phone { get; set; }
         public string Email { get; set; }
         public sbyte Active { get; set; }
 
+        public virtual Role Role { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
     }
 }

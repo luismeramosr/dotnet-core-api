@@ -9,35 +9,45 @@ using Microsoft.AspNetCore.Http;
 
 namespace dotnet_core_api.Controllers {
 
-    // Ruta base para todos los endpoints /api/category/*
+    // Ruta base para todos los endpoints /api/vendor/*
     [ApiController]
-    [Route("api/category/")]    
-    public class CategoryController : ControllerBase {
-        
-        private DB_PAMYSContext db = new DB_PAMYSContext();
+    [Route("api/vendor/")]
+    public class VendorController : ControllerBase {
 
-        // Todos los endpoints son funciones asincronas, para mejorar
-        // el performance, aun falta ver una manera de retornar los estados http
-        // y validar errores.
+        private DB_PAMYSContext db = new DB_PAMYSContext();
+        
         [Route("all")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IEnumerable<Category>> getAll() {
-            return await Task.Run<IEnumerable<Category>>(() => { 
-                return this.db.Categories.ToList();
+        public async Task<IEnumerable<Vendor>> getAll() {
+            return await Task.Run<IEnumerable<Vendor>>(() => { 
+                return this.db.Vendors.ToList();
             });
         }
 
-        // Recibe el parametro id
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]      
-        public async Task<ActionResult<Category>> getById(int id) {
-            return await Task.Run<ActionResult<Category>>(() => {
-                var category = this.db.Categories.Find(id);
-                if (category != null)
-                    return Ok(category);
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<Vendor>> getById(int id) {
+            return await Task.Run<ActionResult<Vendor>>(() => {
+                var vendor = this.db.Vendors.Find(id);
+                if (vendor != null)
+                    return Ok(vendor);
+                else
+                    return NotFound();
+            });
+        }
+
+        [Route("search")]
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<Vendor>> getByCompany(string company) {
+            return await Task.Run<ActionResult<Vendor>>(() => {
+                var vendor = new  Vendor();
+                vendor = this.db.Vendors.ToList().Find((vendor) => vendor.Company == company);
+                if (vendor != null)
+                    return Ok(vendor);
                 else
                     return NotFound();
             });
@@ -47,13 +57,13 @@ namespace dotnet_core_api.Controllers {
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> add(Category category) {
+        public async Task<IActionResult> add(Vendor vendor) {
             return await Task.Run<IActionResult>(() => {
-                if (category == null) 
+                if (vendor == null) 
                     return BadRequest();                
-                this.db.Categories.Add(category);
+                this.db.Vendors.Add(vendor);
                 this.db.SaveChanges();
-                return Created("/api/category", category);
+                return Created("/api/vendor", vendor);
             });
         }
 
@@ -61,11 +71,11 @@ namespace dotnet_core_api.Controllers {
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> update(Category category) {
+        public async Task<IActionResult> update(Vendor vendor) {
             return await Task.Run<IActionResult>(() =>
             {     
                 try {
-                    var updateTask = this.db.Categories.Update(category);
+                    var updateTask = this.db.Vendors.Update(vendor);
                     if (updateTask.State == EntityState.Modified)
                         this.db.SaveChanges();
                     return Ok();
@@ -82,7 +92,7 @@ namespace dotnet_core_api.Controllers {
         public async Task<IActionResult> delete(uint id) {         
             return await Task.Run<IActionResult>(() => {
                 try {
-                    var deleteTask = this.db.Categories.Remove(new Category(){Id=id});
+                    var deleteTask = this.db.Vendors.Remove(new Vendor(){Id=id});
                     if (deleteTask.State == EntityState.Deleted)
                         this.db.SaveChanges();
                     return Ok();
@@ -93,4 +103,5 @@ namespace dotnet_core_api.Controllers {
         }
 
     }
+
 }

@@ -18,8 +18,10 @@ namespace dotnet_core_api.Models
         }
 
         public virtual DbSet<Category> Categories { get; set; }
+        public virtual DbSet<DocumentType> DocumentTypes { get; set; }
         public virtual DbSet<Order> Orders { get; set; }
         public virtual DbSet<OrderDetail> OrderDetails { get; set; }
+        public virtual DbSet<OrderStatus> OrderStatuses { get; set; }
         public virtual DbSet<Product> Products { get; set; }
         public virtual DbSet<ProductImage> ProductImages { get; set; }
         public virtual DbSet<Role> Roles { get; set; }
@@ -42,8 +44,7 @@ namespace dotnet_core_api.Models
                 entity.ToTable("CATEGORY");
 
                 entity.Property(e => e.Id)
-                    .HasColumnType("int(11)")
-                    .ValueGeneratedNever()
+                    .HasColumnType("int(10) unsigned")
                     .HasColumnName("id");
 
                 entity.Property(e => e.Active)
@@ -65,24 +66,55 @@ namespace dotnet_core_api.Models
                     .HasCollation("utf8mb4_general_ci");
             });
 
-            modelBuilder.Entity<Order>(entity =>
+            modelBuilder.Entity<DocumentType>(entity =>
             {
-                entity.ToTable("ORDER");
-
-                entity.HasIndex(e => e.ClientId, "client_id");
+                entity.ToTable("DOCUMENT_TYPE");
 
                 entity.Property(e => e.Id)
-                    .HasColumnType("int(11)")
-                    .ValueGeneratedNever()
+                    .HasColumnType("int(10) unsigned")
+                    .HasColumnName("id");
+
+                entity.Property(e => e.Doctype)
+                    .IsRequired()
+                    .HasColumnType("varchar(15)")
+                    .HasColumnName("doctype")
+                    .HasCharSet("utf8mb4")
+                    .HasCollation("utf8mb4_general_ci");
+            });
+
+            modelBuilder.Entity<Order>(entity =>
+            {
+                entity.ToTable("ORDERS");
+
+                entity.HasIndex(e => e.DocumentTypeId, "fk_ORDERS_DOCUMENT_TYPE1");
+
+                entity.HasIndex(e => e.OrderStatusId, "fk_ORDERS_ORDER_STATUS1");
+
+                entity.HasIndex(e => e.ClientId, "fk_ORDER_CLIENT1");
+
+                entity.Property(e => e.Id)
+                    .HasColumnType("int(10) unsigned")
                     .HasColumnName("id");
 
                 entity.Property(e => e.ClientId)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int(10) unsigned")
                     .HasColumnName("client_id");
 
                 entity.Property(e => e.DateCreated)
-                    .HasColumnType("date")
+                    .HasColumnType("datetime")
                     .HasColumnName("date_created");
+
+                entity.Property(e => e.DocumentTypeId)
+                    .HasColumnType("int(10) unsigned")
+                    .HasColumnName("document_type_id");
+
+                entity.Property(e => e.Igv)
+                    .HasPrecision(10)
+                    .HasColumnName("igv");
+
+                entity.Property(e => e.OrderStatusId)
+                    .HasColumnType("int(10) unsigned")
+                    .HasColumnName("order_status_id");
 
                 entity.Property(e => e.ShippingAddress)
                     .IsRequired()
@@ -91,42 +123,55 @@ namespace dotnet_core_api.Models
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_general_ci");
 
-                entity.Property(e => e.Status)
-                    .HasColumnType("tinyint(4)")
-                    .HasColumnName("status");
+                entity.Property(e => e.Subtotal)
+                    .HasPrecision(10)
+                    .HasColumnName("subtotal");
 
                 entity.Property(e => e.Total)
                     .HasPrecision(10)
                     .HasColumnName("total");
 
+                entity.Property(e => e.ZipCode)
+                    .HasColumnType("int(11)")
+                    .HasColumnName("zip_code");
+
                 entity.HasOne(d => d.Client)
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.ClientId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("ORDER_ibfk_1");
+                    .HasConstraintName("fk_ORDER_CLIENT1");
+
+                entity.HasOne(d => d.DocumentType)
+                    .WithMany(p => p.Orders)
+                    .HasForeignKey(d => d.DocumentTypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_ORDERS_DOCUMENT_TYPE1");
+
+                entity.HasOne(d => d.OrderStatus)
+                    .WithMany(p => p.Orders)
+                    .HasForeignKey(d => d.OrderStatusId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_ORDERS_ORDER_STATUS1");
             });
 
             modelBuilder.Entity<OrderDetail>(entity =>
             {
-                entity.HasKey(e => new { e.Id, e.OrderId, e.ProductId })
+                entity.HasKey(e => new { e.OrderId, e.ProductId })
                     .HasName("PRIMARY")
-                    .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0, 0 });
+                    .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0 });
 
                 entity.ToTable("ORDER_DETAILS");
 
-                entity.Property(e => e.Id)
-                    .HasColumnType("int(11)")
-                    .HasColumnName("id");
+                entity.HasIndex(e => e.ProductId, "fk_ORDER_DETAILS_PRODUCT1");
 
                 entity.Property(e => e.OrderId)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int(10) unsigned")
+                    .ValueGeneratedOnAdd()
                     .HasColumnName("order_id");
 
                 entity.Property(e => e.ProductId)
-                    .HasColumnType("varchar(35)")
-                    .HasColumnName("product_id")
-                    .HasCharSet("utf8mb4")
-                    .HasCollation("utf8mb4_general_ci");
+                    .HasColumnType("int(10) unsigned")
+                    .HasColumnName("product_id");
 
                 entity.Property(e => e.Price)
                     .HasPrecision(10)
@@ -135,25 +180,55 @@ namespace dotnet_core_api.Models
                 entity.Property(e => e.Quantity)
                     .HasColumnType("int(11)")
                     .HasColumnName("quantity");
+
+                entity.HasOne(d => d.Order)
+                    .WithMany(p => p.OrderDetails)
+                    .HasForeignKey(d => d.OrderId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_ORDER_DETAILS_ORDER1");
+
+                entity.HasOne(d => d.Product)
+                    .WithMany(p => p.OrderDetails)
+                    .HasForeignKey(d => d.ProductId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_ORDER_DETAILS_PRODUCT1");
+            });
+
+            modelBuilder.Entity<OrderStatus>(entity =>
+            {
+                entity.ToTable("ORDER_STATUS");
+
+                entity.Property(e => e.Id)
+                    .HasColumnType("int(10) unsigned")
+                    .HasColumnName("id");
+
+                entity.Property(e => e.Status)
+                    .IsRequired()
+                    .HasColumnType("varchar(15)")
+                    .HasColumnName("status")
+                    .HasCharSet("utf8mb4")
+                    .HasCollation("utf8mb4_general_ci");
             });
 
             modelBuilder.Entity<Product>(entity =>
             {
                 entity.ToTable("PRODUCT");
 
+                entity.HasIndex(e => e.CategoryId, "fk_PRODUCT_CATEGORY1");
+
+                entity.HasIndex(e => e.VendorId, "fk_PRODUCT_VENDOR1");
+
                 entity.Property(e => e.Id)
-                    .HasColumnType("varchar(35)")
-                    .HasColumnName("id")
-                    .HasCharSet("utf8mb4")
-                    .HasCollation("utf8mb4_general_ci");
+                    .HasColumnType("int(10) unsigned")
+                    .HasColumnName("id");
 
                 entity.Property(e => e.CategoryId)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int(10) unsigned")
                     .HasColumnName("category_id");
 
-                entity.Property(e => e.CreateDate)
-                    .HasColumnType("date")
-                    .HasColumnName("create_date");
+                entity.Property(e => e.DateCreated)
+                    .HasColumnType("datetime")
+                    .HasColumnName("date_created");
 
                 entity.Property(e => e.Description)
                     .IsRequired()
@@ -181,6 +256,10 @@ namespace dotnet_core_api.Models
                     .HasColumnType("int(11)")
                     .HasColumnName("stock");
 
+                entity.Property(e => e.StockMin)
+                    .HasColumnType("int(11)")
+                    .HasColumnName("stock_min");
+
                 entity.Property(e => e.ThumbnailUrl)
                     .IsRequired()
                     .HasColumnType("varchar(100)")
@@ -189,25 +268,35 @@ namespace dotnet_core_api.Models
                     .HasCollation("utf8mb4_general_ci");
 
                 entity.Property(e => e.VendorId)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int(10) unsigned")
                     .HasColumnName("vendor_id");
+
+                entity.HasOne(d => d.Category)
+                    .WithMany(p => p.Products)
+                    .HasForeignKey(d => d.CategoryId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_PRODUCT_CATEGORY1");
+
+                entity.HasOne(d => d.Vendor)
+                    .WithMany(p => p.Products)
+                    .HasForeignKey(d => d.VendorId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_PRODUCT_VENDOR1");
             });
 
             modelBuilder.Entity<ProductImage>(entity =>
             {
                 entity.ToTable("PRODUCT_IMAGES");
 
+                entity.HasIndex(e => e.ProductId, "fk_PRODUCT_IMAGES_PRODUCT1");
+
                 entity.Property(e => e.Id)
-                    .HasColumnType("int(11)")
-                    .ValueGeneratedNever()
+                    .HasColumnType("int(10) unsigned")
                     .HasColumnName("id");
 
                 entity.Property(e => e.ProductId)
-                    .IsRequired()
-                    .HasColumnType("varchar(50)")
-                    .HasColumnName("product_id")
-                    .HasCharSet("utf8mb4")
-                    .HasCollation("utf8mb4_general_ci");
+                    .HasColumnType("int(10) unsigned")
+                    .HasColumnName("product_id");
 
                 entity.Property(e => e.Url)
                     .IsRequired()
@@ -215,6 +304,12 @@ namespace dotnet_core_api.Models
                     .HasColumnName("url")
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_general_ci");
+
+                entity.HasOne(d => d.Product)
+                    .WithMany(p => p.ProductImages)
+                    .HasForeignKey(d => d.ProductId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_PRODUCT_IMAGES_PRODUCT1");
             });
 
             modelBuilder.Entity<Role>(entity =>
@@ -222,8 +317,7 @@ namespace dotnet_core_api.Models
                 entity.ToTable("ROLE");
 
                 entity.Property(e => e.Id)
-                    .HasColumnType("int(11)")
-                    .ValueGeneratedNever()
+                    .HasColumnType("int(10) unsigned")
                     .HasColumnName("id");
 
                 entity.Property(e => e.Name)
@@ -238,12 +332,16 @@ namespace dotnet_core_api.Models
             {
                 entity.ToTable("USER");
 
-                entity.HasIndex(e => new { e.Username, e.Phone, e.Email }, "uniqueData")
+                entity.HasIndex(e => e.RoleId, "fk_CLIENT_ROLE");
+
+                entity.HasIndex(e => e.Phone, "phone")
+                    .IsUnique();
+
+                entity.HasIndex(e => e.Username, "username")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
-                    .HasColumnType("int(11)")
-                    .ValueGeneratedNever()
+                    .HasColumnType("int(10) unsigned")
                     .HasColumnName("id");
 
                 entity.Property(e => e.Active)
@@ -251,7 +349,6 @@ namespace dotnet_core_api.Models
                     .HasColumnName("active");
 
                 entity.Property(e => e.Address)
-                    .IsRequired()
                     .HasColumnType("varchar(100)")
                     .HasColumnName("address")
                     .HasCharSet("utf8mb4")
@@ -293,7 +390,7 @@ namespace dotnet_core_api.Models
                     .HasCollation("utf8mb4_general_ci");
 
                 entity.Property(e => e.RoleId)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("int(10) unsigned")
                     .HasColumnName("role_id");
 
                 entity.Property(e => e.Username)
@@ -302,6 +399,16 @@ namespace dotnet_core_api.Models
                     .HasColumnName("username")
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_general_ci");
+
+                entity.Property(e => e.ZipCode)
+                    .HasColumnType("int(11)")
+                    .HasColumnName("zip_code");
+
+                entity.HasOne(d => d.Role)
+                    .WithMany(p => p.Users)
+                    .HasForeignKey(d => d.RoleId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_CLIENT_ROLE");
             });
 
             modelBuilder.Entity<Vendor>(entity =>
@@ -309,8 +416,7 @@ namespace dotnet_core_api.Models
                 entity.ToTable("VENDOR");
 
                 entity.Property(e => e.Id)
-                    .HasColumnType("int(11)")
-                    .ValueGeneratedNever()
+                    .HasColumnType("int(10) unsigned")
                     .HasColumnName("id");
 
                 entity.Property(e => e.Company)
