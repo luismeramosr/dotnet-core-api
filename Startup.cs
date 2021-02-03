@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using dotnet_core_api.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -13,7 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+using dotnet_core_api.Models;
 
 namespace dotnet_core_api
 {
@@ -34,21 +33,7 @@ namespace dotnet_core_api
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "dotnet_core_api", Version = "v1" });
-            });
-            services.AddDbContextPool<db_pamysContext>(
-            dbContextOptions => dbContextOptions
-            .UseMySql(
-            // Replace with your connection string.
-            Configuration.GetConnectionString("DB_PAMYS"),
-            // Replace with your server version and type.
-            // For common usages, see pull request #1233.
-            new MySqlServerVersion(new Version(8, 0, 21)), // use MariaDbServerVersion for MariaDB
-            mySqlOptions => mySqlOptions
-            .CharSetBehavior(CharSetBehavior.NeverAppend))
-            // Everything from this point on is optional but helps with debugging.
-            .EnableSensitiveDataLogging()
-            .EnableDetailedErrors()
-            );
+            });            
             services.AddCors(options => {
                 options.AddPolicy("default", 
                     builder => {
@@ -56,6 +41,7 @@ namespace dotnet_core_api
                         builder.AllowAnyMethod();
                     });
             });
+            services.AddDbContext<BDTRANSITO2020_EC03Context>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
