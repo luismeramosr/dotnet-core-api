@@ -22,10 +22,14 @@ namespace dotnet_core_api.Models
         public DateTime DateCreated { get; set; }
         public uint DocumentTypeId { get; set; }
         public uint OrderStatusId { get; set; }
+        public uint PaymentTypeId { get; set; }
+        public uint? VoucherId { get; set; }
 
         public virtual User Client { get; set; }
         public virtual DocumentType DocumentType { get; set; }
         public virtual OrderStatus OrderStatus { get; set; }
+        public virtual PaymentType PaymentType { get; set; }
+        public virtual Voucher Voucher { get; set; }
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }
     }
 }

@@ -17,7 +17,7 @@ namespace dotnet_core_api.Models
         public string Name { get; set; }
         public string Description { get; set; }
         public sbyte Active { get; set; }
-        
+
         [JsonIgnore]
         public virtual ICollection<Product> Products { get; set; }
     }

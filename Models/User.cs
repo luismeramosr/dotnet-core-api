@@ -10,6 +10,7 @@ namespace dotnet_core_api.Models
         public User()
         {
             Orders = new HashSet<Order>();
+            Vouchers = new HashSet<Voucher>();
         }
 
         public uint Id { get; set; }
@@ -26,5 +27,6 @@ namespace dotnet_core_api.Models
 
         public virtual Role Role { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
+        public virtual ICollection<Voucher> Vouchers { get; set; }
     }
 }

@@ -6,13 +6,13 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace dotnet_core_api.Models
 {
-    public partial class DB_PAMYSContext : DbContext
+    public partial class db_pamysContext : DbContext
     {
-        public DB_PAMYSContext()
+        public db_pamysContext()
         {
         }
 
-        public DB_PAMYSContext(DbContextOptions<DB_PAMYSContext> options)
+        public db_pamysContext(DbContextOptions<db_pamysContext> options)
             : base(options)
         {
         }
@@ -22,18 +22,20 @@ namespace dotnet_core_api.Models
         public virtual DbSet<Order> Orders { get; set; }
         public virtual DbSet<OrderDetail> OrderDetails { get; set; }
         public virtual DbSet<OrderStatus> OrderStatuses { get; set; }
+        public virtual DbSet<PaymentType> PaymentTypes { get; set; }
         public virtual DbSet<Product> Products { get; set; }
         public virtual DbSet<ProductImage> ProductImages { get; set; }
         public virtual DbSet<Role> Roles { get; set; }
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<Vendor> Vendors { get; set; }
+        public virtual DbSet<Voucher> Vouchers { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseMySql("server=localhost;database=DB_PAMYS;user=root;password=rpi75695118@192.168.1.200;treattinyasboolean=true", Microsoft.EntityFrameworkCore.ServerVersion.FromString("10.4.15-mariadb"));
+                optionsBuilder.UseMySql("server=localhost;database=db_pamys;user id=root", Microsoft.EntityFrameworkCore.ServerVersion.FromString("10.4.17-mariadb"));
             }
         }
 
@@ -41,7 +43,7 @@ namespace dotnet_core_api.Models
         {
             modelBuilder.Entity<Category>(entity =>
             {
-                entity.ToTable("CATEGORY");
+                entity.ToTable("category");
 
                 entity.Property(e => e.Id)
                     .HasColumnType("int(10) unsigned")
@@ -68,7 +70,7 @@ namespace dotnet_core_api.Models
 
             modelBuilder.Entity<DocumentType>(entity =>
             {
-                entity.ToTable("DOCUMENT_TYPE");
+                entity.ToTable("document_type");
 
                 entity.Property(e => e.Id)
                     .HasColumnType("int(10) unsigned")
@@ -76,7 +78,7 @@ namespace dotnet_core_api.Models
 
                 entity.Property(e => e.Doctype)
                     .IsRequired()
-                    .HasColumnType("varchar(15)")
+                    .HasColumnType("varchar(20)")
                     .HasColumnName("doctype")
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_general_ci");
@@ -84,11 +86,15 @@ namespace dotnet_core_api.Models
 
             modelBuilder.Entity<Order>(entity =>
             {
-                entity.ToTable("ORDERS");
+                entity.ToTable("orders");
 
                 entity.HasIndex(e => e.DocumentTypeId, "fk_ORDERS_DOCUMENT_TYPE1");
 
                 entity.HasIndex(e => e.OrderStatusId, "fk_ORDERS_ORDER_STATUS1");
+
+                entity.HasIndex(e => e.PaymentTypeId, "fk_ORDERS_PAYMENT_TYPE1");
+
+                entity.HasIndex(e => e.VoucherId, "fk_ORDERS_VOUCHER1");
 
                 entity.HasIndex(e => e.ClientId, "fk_ORDER_CLIENT1");
 
@@ -116,6 +122,10 @@ namespace dotnet_core_api.Models
                     .HasColumnType("int(10) unsigned")
                     .HasColumnName("order_status_id");
 
+                entity.Property(e => e.PaymentTypeId)
+                    .HasColumnType("int(10) unsigned")
+                    .HasColumnName("payment_type_id");
+
                 entity.Property(e => e.ShippingAddress)
                     .IsRequired()
                     .HasColumnType("varchar(100)")
@@ -130,6 +140,10 @@ namespace dotnet_core_api.Models
                 entity.Property(e => e.Total)
                     .HasPrecision(10)
                     .HasColumnName("total");
+
+                entity.Property(e => e.VoucherId)
+                    .HasColumnType("int(10) unsigned")
+                    .HasColumnName("voucher_id");
 
                 entity.Property(e => e.ZipCode)
                     .HasColumnType("int(11)")
@@ -152,6 +166,17 @@ namespace dotnet_core_api.Models
                     .HasForeignKey(d => d.OrderStatusId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("fk_ORDERS_ORDER_STATUS1");
+
+                entity.HasOne(d => d.PaymentType)
+                    .WithMany(p => p.Orders)
+                    .HasForeignKey(d => d.PaymentTypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_ORDERS_PAYMENT_TYPE1");
+
+                entity.HasOne(d => d.Voucher)
+                    .WithMany(p => p.Orders)
+                    .HasForeignKey(d => d.VoucherId)
+                    .HasConstraintName("fk_ORDERS_VOUCHER1");
             });
 
             modelBuilder.Entity<OrderDetail>(entity =>
@@ -160,7 +185,7 @@ namespace dotnet_core_api.Models
                     .HasName("PRIMARY")
                     .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0 });
 
-                entity.ToTable("ORDER_DETAILS");
+                entity.ToTable("order_details");
 
                 entity.HasIndex(e => e.ProductId, "fk_ORDER_DETAILS_PRODUCT1");
 
@@ -196,7 +221,7 @@ namespace dotnet_core_api.Models
 
             modelBuilder.Entity<OrderStatus>(entity =>
             {
-                entity.ToTable("ORDER_STATUS");
+                entity.ToTable("order_status");
 
                 entity.Property(e => e.Id)
                     .HasColumnType("int(10) unsigned")
@@ -204,15 +229,31 @@ namespace dotnet_core_api.Models
 
                 entity.Property(e => e.Status)
                     .IsRequired()
-                    .HasColumnType("varchar(15)")
+                    .HasColumnType("varchar(20)")
                     .HasColumnName("status")
+                    .HasCharSet("utf8mb4")
+                    .HasCollation("utf8mb4_general_ci");
+            });
+
+            modelBuilder.Entity<PaymentType>(entity =>
+            {
+                entity.ToTable("payment_type");
+
+                entity.Property(e => e.Id)
+                    .HasColumnType("int(10) unsigned")
+                    .HasColumnName("id");
+
+                entity.Property(e => e.Type)
+                    .IsRequired()
+                    .HasColumnType("varchar(20)")
+                    .HasColumnName("type")
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_general_ci");
             });
 
             modelBuilder.Entity<Product>(entity =>
             {
-                entity.ToTable("PRODUCT");
+                entity.ToTable("product");
 
                 entity.HasIndex(e => e.CategoryId, "fk_PRODUCT_CATEGORY1");
 
@@ -286,7 +327,7 @@ namespace dotnet_core_api.Models
 
             modelBuilder.Entity<ProductImage>(entity =>
             {
-                entity.ToTable("PRODUCT_IMAGES");
+                entity.ToTable("product_images");
 
                 entity.HasIndex(e => e.ProductId, "fk_PRODUCT_IMAGES_PRODUCT1");
 
@@ -314,7 +355,7 @@ namespace dotnet_core_api.Models
 
             modelBuilder.Entity<Role>(entity =>
             {
-                entity.ToTable("ROLE");
+                entity.ToTable("role");
 
                 entity.Property(e => e.Id)
                     .HasColumnType("int(10) unsigned")
@@ -330,7 +371,7 @@ namespace dotnet_core_api.Models
 
             modelBuilder.Entity<User>(entity =>
             {
-                entity.ToTable("USER");
+                entity.ToTable("user");
 
                 entity.HasIndex(e => e.RoleId, "fk_CLIENT_ROLE");
 
@@ -413,7 +454,7 @@ namespace dotnet_core_api.Models
 
             modelBuilder.Entity<Vendor>(entity =>
             {
-                entity.ToTable("VENDOR");
+                entity.ToTable("vendor");
 
                 entity.Property(e => e.Id)
                     .HasColumnType("int(10) unsigned")
@@ -432,6 +473,54 @@ namespace dotnet_core_api.Models
                     .HasColumnName("description")
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_general_ci");
+            });
+
+            modelBuilder.Entity<Voucher>(entity =>
+            {
+                entity.ToTable("voucher");
+
+                entity.HasIndex(e => e.UserId, "fk_VOUCHER_USER1");
+
+                entity.Property(e => e.Id)
+                    .HasColumnType("int(10) unsigned")
+                    .HasColumnName("id");
+
+                entity.Property(e => e.Amount)
+                    .HasPrecision(10)
+                    .HasColumnName("amount");
+
+                entity.Property(e => e.ClientAccountId)
+                    .HasColumnType("int(11)")
+                    .HasColumnName("client_account_id");
+
+                entity.Property(e => e.OperationId)
+                    .HasColumnType("int(10) unsigned")
+                    .HasColumnName("operation_id");
+
+                entity.Property(e => e.PaymentDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("payment_date");
+
+                entity.Property(e => e.StoreAccountId)
+                    .HasColumnType("int(11)")
+                    .HasColumnName("store_account_id");
+
+                entity.Property(e => e.UserId)
+                    .HasColumnType("int(10) unsigned")
+                    .HasColumnName("user_id");
+
+                entity.Property(e => e.VoucherImgUrl)
+                    .IsRequired()
+                    .HasColumnType("varchar(100)")
+                    .HasColumnName("voucher_img_url")
+                    .HasCharSet("utf8mb4")
+                    .HasCollation("utf8mb4_general_ci");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Vouchers)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_VOUCHER_USER1");
             });
 
             OnModelCreatingPartial(modelBuilder);

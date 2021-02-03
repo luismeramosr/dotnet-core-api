@@ -35,7 +35,7 @@ namespace dotnet_core_api
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "dotnet_core_api", Version = "v1" });
             });
-            services.AddDbContextPool<DB_PAMYSContext>(
+            services.AddDbContextPool<db_pamysContext>(
             dbContextOptions => dbContextOptions
             .UseMySql(
             // Replace with your connection string.
@@ -49,6 +49,13 @@ namespace dotnet_core_api
             .EnableSensitiveDataLogging()
             .EnableDetailedErrors()
             );
+            services.AddCors(options => {
+                options.AddPolicy("default", 
+                    builder => {
+                        builder.WithOrigins("http://localhost:4200");
+                        builder.AllowAnyMethod();
+                    });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -62,11 +69,10 @@ namespace dotnet_core_api
             }
 
             app.UseHttpsRedirection();
-
             app.UseRouting();
-
             app.UseAuthorization();
-
+            app.UseCors("default");
+            
             app.UseEndpoints(endpoints =>
             {   
                 endpoints.MapControllers();                

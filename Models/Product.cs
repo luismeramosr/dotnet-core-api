@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 #nullable disable
 
@@ -26,13 +25,9 @@ namespace dotnet_core_api.Models
         public int Stock { get; set; }
         public int StockMin { get; set; }
 
-        [JsonIgnore]
         public virtual Category Category { get; set; }
-        [JsonIgnore]
         public virtual Vendor Vendor { get; set; }
-        [JsonIgnore]
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }
-        [JsonIgnore]
         public virtual ICollection<ProductImage> ProductImages { get; set; }
     }
 }

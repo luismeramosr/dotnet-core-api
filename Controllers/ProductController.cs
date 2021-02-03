@@ -14,7 +14,7 @@ namespace dotnet_core_api.Controllers {
     [Route("api/product/")]
     public class ProductController : ControllerBase {
 
-        private DB_PAMYSContext db = new DB_PAMYSContext();
+        private db_pamysContext db = new db_pamysContext();
         
         [Route("all")]
         [HttpGet]

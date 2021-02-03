@@ -14,7 +14,7 @@ namespace dotnet_core_api.Controllers {
     [Route("api/category/")]    
     public class CategoryController : ControllerBase {
         
-        private DB_PAMYSContext db = new DB_PAMYSContext();
+        private db_pamysContext db = new db_pamysContext();
 
         // Todos los endpoints son funciones asincronas, para mejorar
         // el performance, aun falta ver una manera de retornar los estados http
@@ -33,7 +33,7 @@ namespace dotnet_core_api.Controllers {
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]      
-        public async Task<ActionResult<Category>> getById(int id) {
+        public async Task<ActionResult<Category>> getById(uint id) {
             return await Task.Run<ActionResult<Category>>(() => {
                 var category = this.db.Categories.Find(id);
                 if (category != null)
