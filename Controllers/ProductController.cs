@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using dotnet_core_api.Models;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Mime;
@@ -25,35 +26,52 @@ namespace dotnet_core_api.Controllers
         {
             return await Task.Run<IEnumerable<Product>>(() =>
             {
-                return this.db.Products.ToList();
+                IEnumerable<Product> products = this.db.Products.ToList();
+                products.ToList().ForEach(product =>
+                  {
+                      product.category = this.db.Categorys.Find(product.IdCategory);
+                      product.vendor = this.db.Vendors.Find(product.IdVendor);
+                      product.ProductImages = this.db.ProductImages.Where(e => e.IdProduct == product.IdProduct).ToList();
+                  });
+                return products;
             });
         }
 
-        [Route("byCategory")]
-        [HttpGet]
+
+        [HttpGet("byCategory/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<Product>>> getByCategory(uint id)
+        public async Task<ActionResult<IEnumerable<Product>>> getByCategory(int id)
         {
             return await Task.Run<ActionResult<IEnumerable<Product>>>(() =>
             {
                 IEnumerable<Product> products;
                 products = this.db.Products.ToList().Where(product => product.IdCategory == id);
-                if (products.Count() > 0)
-                    return Ok(new { products = products, data = products });
-                else
-                    return NotFound();
+                if (products.Count() != 0)
+                {
+                    products.ToList().ForEach(product =>
+                  {
+                      product.category = this.db.Categorys.Find(product.IdCategory);
+                      product.vendor = this.db.Vendors.Find(product.IdVendor);
+                      product.ProductImages = this.db.ProductImages.Where(e => e.IdProduct == product.IdProduct).ToList();
+                  });
+                    return Ok(products);
+                }
+                return NotFound();
             });
         }
 
-        [HttpGet]
+        [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Product>> getById(uint id)
+        public async Task<ActionResult<Product>> getById(int id)
         {
             return await Task.Run<ActionResult<Product>>(() =>
             {
                 var product = this.db.Products.Find(id);
+                product.category = this.db.Categorys.Find(product.IdCategory);
+                product.vendor = this.db.Vendors.Find(product.IdVendor);
+                product.ProductImages = this.db.ProductImages.Where(e => e.IdProduct == id).ToList();
                 if (product != null)
                     return Ok(product);
                 else
@@ -61,20 +79,26 @@ namespace dotnet_core_api.Controllers
             });
         }
 
-        [Route("byName")]
-        [HttpGet]
+
+        [HttpGet("search/{name}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Product>> getByName(string name)
+        public async Task<ActionResult<IEnumerable<Product>>> getByName(string name)
         {
-            return await Task.Run<ActionResult<Product>>(() =>
+            return await Task.Run<ActionResult<IEnumerable<Product>>>(() =>
             {
-                var product = new Product();
-                product = this.db.Products.ToList().Find((product) => product.Name == name);
-                if (product != null)
-                    return Ok(product);
-                else
-                    return NotFound();
+                IEnumerable<Product> products = this.db.Products.Where((product) => product.Name.Contains(name));
+                if (products.Count() != 0)
+                {
+                    products.ToList().ForEach(product =>
+                  {
+                      product.category = this.db.Categorys.Find(product.IdCategory);
+                      product.vendor = this.db.Vendors.Find(product.IdVendor);
+                      product.ProductImages = this.db.ProductImages.Where(e => e.IdProduct == product.IdProduct).ToList();
+                  });
+                    return Ok(products);
+                }
+                return NotFound();
             });
         }
 
@@ -82,15 +106,20 @@ namespace dotnet_core_api.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> add(Product product)
+        public async Task<ActionResult<Product>> save(Product product)
         {
-            return await Task.Run<IActionResult>(() =>
+            return await Task.Run<ActionResult<Product>>(() =>
             {
                 if (product == null)
                     return BadRequest();
+                product.DateCreated = DateTime.Now;
+                product.Slug = product.Name.ToLower().Replace(" ", "-");
                 this.db.Products.Add(product);
                 this.db.SaveChanges();
-                return Created("/api/vendor", product);
+                product.category = this.db.Categorys.Find(product.IdCategory);
+                product.vendor = this.db.Vendors.Find(product.IdVendor);
+                product.ProductImages = this.db.ProductImages.Where(e => e.IdProduct == product.IdProduct).ToList();
+                return Ok(product);
             });
         }
 
@@ -98,16 +127,31 @@ namespace dotnet_core_api.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> update(Product product)
+        public async Task<ActionResult<Product>> update(Product product)
         {
-            return await Task.Run<IActionResult>(() =>
+            return await Task.Run<ActionResult<Product>>(() =>
             {
                 try
                 {
-                    var updateTask = this.db.Products.Update(product);
-                    if (updateTask.State == EntityState.Modified)
-                        this.db.SaveChanges();
-                    return Ok();
+                    var currentProduct = this.db.Products.Find(product.IdProduct);
+                    // aqui pondre lo que se modificara esto es un caso especial
+                    currentProduct.Name = product.Name;
+                    currentProduct.Slug = product.Name.ToLower().Replace(" ", "-");
+                    currentProduct.Price = product.Price;
+                    currentProduct.SalePrice = product.SalePrice;
+                    currentProduct.Stock = product.Stock;
+                    currentProduct.Sku = product.Sku;
+                    currentProduct.Description = product.Description;
+                    currentProduct.IdVendor = product.IdVendor;
+                    currentProduct.IdCategory = product.IdCategory;
+
+
+                    // if (updateTask.State == EntityState.Modified)
+                    this.db.SaveChanges();
+                    currentProduct.category = this.db.Categorys.Find(product.IdCategory);
+                    currentProduct.vendor = this.db.Vendors.Find(product.IdVendor);
+                    currentProduct.ProductImages = this.db.ProductImages.Where(e => e.IdProduct == product.IdProduct).ToList();
+                    return Ok(currentProduct);
                 }
                 catch (DbUpdateException)
                 {

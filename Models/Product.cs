@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Text.Json.Serialization;
 #nullable disable
 
 namespace dotnet_core_api.Models
@@ -13,7 +13,7 @@ namespace dotnet_core_api.Models
             ProductImages = new HashSet<ProductImage>();
         }
 
-        public int Id { get; set; }
+        public int IdProduct { get; set; }
         public DateTime? DateCreated { get; set; }
         public string Description { get; set; }
         public int? IdCategory { get; set; }
@@ -26,8 +26,11 @@ namespace dotnet_core_api.Models
         public int? Sku { get; set; }
         public string Slug { get; set; }
 
-        public virtual Category IdCategoryNavigation { get; set; }
-        public virtual Vendor IdVendorNavigation { get; set; }
+
+        public virtual Category category { get; set; }
+        public virtual Vendor vendor { get; set; }
+        
+        [JsonIgnore]
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }
         public virtual ICollection<ProductImage> ProductImages { get; set; }
     }

@@ -43,10 +43,10 @@ namespace dotnet_core_api.Models
         {
             modelBuilder.Entity<Category>(entity =>
             {
-                entity.HasKey(e => e.idCategory);
+                entity.HasKey(e => e.IdCategory);
                 entity.ToTable("categorys");
 
-                entity.Property(e => e.idCategory)
+                entity.Property(e => e.IdCategory)
                     .HasColumnType("int(11)")
                     .HasColumnName("id");
 
@@ -317,6 +317,7 @@ namespace dotnet_core_api.Models
 
             modelBuilder.Entity<Product>(entity =>
             {
+                entity.HasKey(e => e.IdProduct);
                 entity.ToTable("products");
 
                 entity.HasIndex(e => e.IdVendor, "FK6723w37bbu82613owfe9o17ln");
@@ -326,7 +327,7 @@ namespace dotnet_core_api.Models
                 entity.HasIndex(e => e.Sku, "UK_fhmd06dsmj6k0n90swsh8ie9g")
                     .IsUnique();
 
-                entity.Property(e => e.Id)
+                entity.Property(e => e.IdProduct)
                     .HasColumnType("int(11)")
                     .HasColumnName("id");
 
@@ -378,12 +379,12 @@ namespace dotnet_core_api.Models
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
-                entity.HasOne(d => d.IdCategoryNavigation)
+                entity.HasOne(d => d.category)
                     .WithMany(p => p.Products)
                     .HasForeignKey(d => d.IdCategory)
                     .HasConstraintName("FKi08vuuyvs43cumvl0eqm21nfg");
 
-                entity.HasOne(d => d.IdVendorNavigation)
+                entity.HasOne(d => d.vendor)
                     .WithMany(p => p.Products)
                     .HasForeignKey(d => d.IdVendor)
                     .HasConstraintName("FK6723w37bbu82613owfe9o17ln");
@@ -391,11 +392,12 @@ namespace dotnet_core_api.Models
 
             modelBuilder.Entity<ProductImage>(entity =>
             {
+                entity.HasKey(e => e.IdProductImages);
                 entity.ToTable("product_images");
 
                 entity.HasIndex(e => e.IdProduct, "FKpbcjehp1361qtyyilvx87d26d");
 
-                entity.Property(e => e.Id)
+                entity.Property(e => e.IdProductImages)
                     .HasColumnType("int(11)")
                     .HasColumnName("id");
 
@@ -432,10 +434,10 @@ namespace dotnet_core_api.Models
 
             modelBuilder.Entity<Vendor>(entity =>
             {
-                entity.HasKey(e => e.idVendor);
+                entity.HasKey(e => e.IdVendor);
                 entity.ToTable("vendors");
 
-                entity.Property(e => e.idVendor)
+                entity.Property(e => e.IdVendor)
                     .HasColumnType("int(11)")
                     .HasColumnName("id");
 
