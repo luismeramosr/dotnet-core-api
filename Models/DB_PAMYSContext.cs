@@ -497,3 +497,4 @@ namespace dotnet_core_api.Models
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }
+
