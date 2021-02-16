@@ -37,7 +37,7 @@ namespace dotnet_core_api.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Category>> getById(uint id)
+        public async Task<ActionResult<Category>> getById(int id)
         {
             return await Task.Run<ActionResult<Category>>(() =>
             {
@@ -53,15 +53,15 @@ namespace dotnet_core_api.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> add(Category category)
+        public async Task<ActionResult<Category>> save(Category category)
         {
-            return await Task.Run<IActionResult>(() =>
+            return await Task.Run<ActionResult<Category>>(() =>
             {
                 if (category == null)
                     return BadRequest();
                 this.db.Categorys.Add(category);
                 this.db.SaveChanges();
-                return Created("/api/category", category);
+                return Ok(category);
             });
         }
 
@@ -69,16 +69,16 @@ namespace dotnet_core_api.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> update(Category category)
+        public async Task<ActionResult<Category>> update(Category category)
         {
-            return await Task.Run<IActionResult>(() =>
+            return await Task.Run<ActionResult<Category>>(() =>
             {
                 try
                 {
                     var updateTask = this.db.Categorys.Update(category);
                     if (updateTask.State == EntityState.Modified)
                         this.db.SaveChanges();
-                    return Ok();
+                    return Ok(category);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -91,7 +91,7 @@ namespace dotnet_core_api.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> delete(uint id)
+        public async Task<IActionResult> delete(int id)
         {
             var category = this.db.Categorys.Find(id);
             return await Task.Run<IActionResult>(() =>

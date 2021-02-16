@@ -65,15 +65,15 @@ namespace dotnet_core_api.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> add(Vendor vendor)
+        public async Task<ActionResult<Vendor>> save(Vendor vendor)
         {
-            return await Task.Run<IActionResult>(() =>
+            return await Task.Run<ActionResult>(() =>
             {
                 if (vendor == null)
                     return BadRequest();
                 this.db.Vendors.Add(vendor);
                 this.db.SaveChanges();
-                return Created("/api/vendor", vendor);
+                return Ok(vendor);
             });
         }
 
@@ -81,16 +81,16 @@ namespace dotnet_core_api.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> update(Vendor vendor)
+        public async Task<ActionResult<Vendor>> update(Vendor vendor)
         {
-            return await Task.Run<IActionResult>(() =>
+            return await Task.Run<ActionResult>(() =>
             {
                 try
                 {
                     var updateTask = this.db.Vendors.Update(vendor);
                     if (updateTask.State == EntityState.Modified)
                         this.db.SaveChanges();
-                    return Ok();
+                    return Ok(vendor);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -103,7 +103,7 @@ namespace dotnet_core_api.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> delete(uint id)
+        public async Task<IActionResult> delete(int id)
         {
             var vendor = this.db.Vendors.Find(id);
             return await Task.Run<IActionResult>(() =>

@@ -43,9 +43,10 @@ namespace dotnet_core_api.Models
         {
             modelBuilder.Entity<Category>(entity =>
             {
+                entity.HasKey(e => e.idCategory);
                 entity.ToTable("categorys");
 
-                entity.Property(e => e.Id)
+                entity.Property(e => e.idCategory)
                     .HasColumnType("int(11)")
                     .HasColumnName("id");
 
@@ -431,9 +432,10 @@ namespace dotnet_core_api.Models
 
             modelBuilder.Entity<Vendor>(entity =>
             {
+                entity.HasKey(e => e.idVendor);
                 entity.ToTable("vendors");
 
-                entity.Property(e => e.Id)
+                entity.Property(e => e.idVendor)
                     .HasColumnType("int(11)")
                     .HasColumnName("id");
 
