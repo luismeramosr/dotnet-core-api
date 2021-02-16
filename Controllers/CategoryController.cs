@@ -7,14 +7,16 @@ using Microsoft.EntityFrameworkCore;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Http;
 
-namespace dotnet_core_api.Controllers {
+namespace dotnet_core_api.Controllers
+{
 
     // Ruta base para todos los endpoints /api/category/*
     [ApiController]
-    [Route("api/category/")]    
-    public class CategoryController : ControllerBase {
-        
-        private db_pamysContext db = new db_pamysContext();
+    [Route("api/category/")]
+    public class CategoryController : ControllerBase
+    {
+
+        private DB_PAMYSContext db = new DB_PAMYSContext();
 
         // Todos los endpoints son funciones asincronas, para mejorar
         // el performance, aun falta ver una manera de retornar los estados http
@@ -23,19 +25,23 @@ namespace dotnet_core_api.Controllers {
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IEnumerable<Category>> getAll() {
-            return await Task.Run<IEnumerable<Category>>(() => { 
-                return this.db.Categories.ToList();
+        public async Task<IEnumerable<Category>> getAll()
+        {
+            return await Task.Run<IEnumerable<Category>>(() =>
+            {
+                return this.db.Categorys.ToList();
             });
         }
 
         // Recibe el parametro id
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]      
-        public async Task<ActionResult<Category>> getById(uint id) {
-            return await Task.Run<ActionResult<Category>>(() => {
-                var category = this.db.Categories.Find(id);
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<Category>> getById(uint id)
+        {
+            return await Task.Run<ActionResult<Category>>(() =>
+            {
+                var category = this.db.Categorys.Find(id);
                 if (category != null)
                     return Ok(category);
                 else
@@ -47,11 +53,13 @@ namespace dotnet_core_api.Controllers {
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> add(Category category) {
-            return await Task.Run<IActionResult>(() => {
-                if (category == null) 
-                    return BadRequest();                
-                this.db.Categories.Add(category);
+        public async Task<IActionResult> add(Category category)
+        {
+            return await Task.Run<IActionResult>(() =>
+            {
+                if (category == null)
+                    return BadRequest();
+                this.db.Categorys.Add(category);
                 this.db.SaveChanges();
                 return Created("/api/category", category);
             });
@@ -61,17 +69,21 @@ namespace dotnet_core_api.Controllers {
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> update(Category category) {
+        public async Task<IActionResult> update(Category category)
+        {
             return await Task.Run<IActionResult>(() =>
-            {     
-                try {
-                    var updateTask = this.db.Categories.Update(category);
+            {
+                try
+                {
+                    var updateTask = this.db.Categorys.Update(category);
                     if (updateTask.State == EntityState.Modified)
                         this.db.SaveChanges();
                     return Ok();
-                }catch (DbUpdateConcurrencyException) {
+                }
+                catch (DbUpdateConcurrencyException)
+                {
                     return NotFound();
-                }             
+                }
             });
         }
 
@@ -79,14 +91,20 @@ namespace dotnet_core_api.Controllers {
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> delete(uint id) {         
-            return await Task.Run<IActionResult>(() => {
-                try {
-                    var deleteTask = this.db.Categories.Remove(new Category(){Id=id});
+        public async Task<IActionResult> delete(uint id)
+        {
+            var category = this.db.Categorys.Find(id);
+            return await Task.Run<IActionResult>(() =>
+            {
+                try
+                {
+                    var deleteTask = this.db.Categorys.Remove(category);
                     if (deleteTask.State == EntityState.Deleted)
                         this.db.SaveChanges();
                     return Ok();
-                }catch (DbUpdateConcurrencyException) {                    
+                }
+                catch (DbUpdateConcurrencyException)
+                {
                     return NotFound();
                 }
             });

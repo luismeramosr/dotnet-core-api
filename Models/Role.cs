@@ -9,12 +9,12 @@ namespace dotnet_core_api.Models
     {
         public Role()
         {
-            Users = new HashSet<User>();
+            Clients = new HashSet<Client>();
         }
 
-        public uint Id { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
 
-        public virtual ICollection<User> Users { get; set; }
+        public virtual ICollection<Client> Clients { get; set; }
     }
 }

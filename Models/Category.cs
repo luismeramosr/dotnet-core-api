@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 #nullable disable
 
@@ -13,12 +12,11 @@ namespace dotnet_core_api.Models
             Products = new HashSet<Product>();
         }
 
-        public uint Id { get; set; }
-        public string Name { get; set; }
+        public int Id { get; set; }
+        public ulong? Active { get; set; }
         public string Description { get; set; }
-        public sbyte Active { get; set; }
+        public string Name { get; set; }
 
-        [JsonIgnore]
         public virtual ICollection<Product> Products { get; set; }
     }
 }

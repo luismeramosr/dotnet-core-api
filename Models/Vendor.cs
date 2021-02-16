@@ -12,7 +12,7 @@ namespace dotnet_core_api.Models
             Products = new HashSet<Product>();
         }
 
-        public uint Id { get; set; }
+        public int Id { get; set; }
         public string Company { get; set; }
         public string Description { get; set; }
 

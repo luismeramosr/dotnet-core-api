@@ -35,7 +35,7 @@ namespace dotnet_core_api
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "dotnet_core_api", Version = "v1" });
             });
-            services.AddDbContextPool<db_pamysContext>(
+            services.AddDbContextPool<DB_PAMYSContext>(
             dbContextOptions => dbContextOptions
             .UseMySql(
             // Replace with your connection string.

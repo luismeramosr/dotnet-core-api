@@ -7,20 +7,24 @@ using Microsoft.EntityFrameworkCore;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Http;
 
-namespace dotnet_core_api.Controllers {
+namespace dotnet_core_api.Controllers
+{
 
     // Ruta base para todos los endpoints /api/product/*
     [ApiController]
     [Route("api/product/")]
-    public class ProductController : ControllerBase {
+    public class ProductController : ControllerBase
+    {
 
-        private db_pamysContext db = new db_pamysContext();
-        
+        private DB_PAMYSContext db = new DB_PAMYSContext();
+
         [Route("all")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IEnumerable<Product>> getAll() {
-            return await Task.Run<IEnumerable<Product>>(() => { 
+        public async Task<IEnumerable<Product>> getAll()
+        {
+            return await Task.Run<IEnumerable<Product>>(() =>
+            {
                 return this.db.Products.ToList();
             });
         }
@@ -29,12 +33,14 @@ namespace dotnet_core_api.Controllers {
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<Product>>> getByCategory(uint id) {
-            return await Task.Run<ActionResult<IEnumerable<Product>>>(() => {
+        public async Task<ActionResult<IEnumerable<Product>>> getByCategory(uint id)
+        {
+            return await Task.Run<ActionResult<IEnumerable<Product>>>(() =>
+            {
                 IEnumerable<Product> products;
-                products = this.db.Products.ToList().Where(product => product.CategoryId == id);
-                if (products.Count()>0)
-                    return Ok(new {products = products, data = products});
+                products = this.db.Products.ToList().Where(product => product.IdCategory == id);
+                if (products.Count() > 0)
+                    return Ok(new { products = products, data = products });
                 else
                     return NotFound();
             });
@@ -43,8 +49,10 @@ namespace dotnet_core_api.Controllers {
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Product>> getById(uint id) {
-            return await Task.Run<ActionResult<Product>>(() => {
+        public async Task<ActionResult<Product>> getById(uint id)
+        {
+            return await Task.Run<ActionResult<Product>>(() =>
+            {
                 var product = this.db.Products.Find(id);
                 if (product != null)
                     return Ok(product);
@@ -57,8 +65,10 @@ namespace dotnet_core_api.Controllers {
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Product>> getByName(string name) {
-            return await Task.Run<ActionResult<Product>>(() => {
+        public async Task<ActionResult<Product>> getByName(string name)
+        {
+            return await Task.Run<ActionResult<Product>>(() =>
+            {
                 var product = new Product();
                 product = this.db.Products.ToList().Find((product) => product.Name == name);
                 if (product != null)
@@ -67,15 +77,17 @@ namespace dotnet_core_api.Controllers {
                     return NotFound();
             });
         }
-        
+
         [HttpPost]
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> add(Product product) {
-            return await Task.Run<IActionResult>(() => {
-                if (product == null) 
-                    return BadRequest();                
+        public async Task<IActionResult> add(Product product)
+        {
+            return await Task.Run<IActionResult>(() =>
+            {
+                if (product == null)
+                    return BadRequest();
                 this.db.Products.Add(product);
                 this.db.SaveChanges();
                 return Created("/api/vendor", product);
@@ -86,17 +98,21 @@ namespace dotnet_core_api.Controllers {
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> update(Product product) {
+        public async Task<IActionResult> update(Product product)
+        {
             return await Task.Run<IActionResult>(() =>
-            {     
-                try {
+            {
+                try
+                {
                     var updateTask = this.db.Products.Update(product);
                     if (updateTask.State == EntityState.Modified)
                         this.db.SaveChanges();
                     return Ok();
-                }catch (DbUpdateException) {
+                }
+                catch (DbUpdateException)
+                {
                     return NotFound();
-                }             
+                }
             });
         }
 
@@ -104,14 +120,21 @@ namespace dotnet_core_api.Controllers {
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> delete(uint id) {         
-            return await Task.Run<IActionResult>(() => {
-                try {
-                    var deleteTask = this.db.Products.Remove(new Product(){Id=id});
+        public async Task<IActionResult> delete(uint id)
+        {
+            var currentProduct = this.db.Products.Find(id);
+
+            return await Task.Run<IActionResult>(() =>
+            {
+                try
+                {
+                    var deleteTask = this.db.Products.Remove(currentProduct);
                     if (deleteTask.State == EntityState.Deleted)
                         this.db.SaveChanges();
                     return Ok();
-                }catch (DbUpdateException) {                    
+                }
+                catch (DbUpdateException)
+                {
                     return NotFound();
                 }
             });

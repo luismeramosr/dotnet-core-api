@@ -7,12 +7,12 @@ namespace dotnet_core_api.Models
 {
     public partial class OrderDetail
     {
-        public uint OrderId { get; set; }
-        public uint ProductId { get; set; }
-        public decimal Price { get; set; }
-        public int Quantity { get; set; }
+        public int IdOrder { get; set; }
+        public int IdProduct { get; set; }
+        public double? Price { get; set; }
+        public int? Quantity { get; set; }
 
-        public virtual Order Order { get; set; }
-        public virtual Product Product { get; set; }
+        public virtual Order IdOrderNavigation { get; set; }
+        public virtual Product IdProductNavigation { get; set; }
     }
 }

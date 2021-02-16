@@ -7,20 +7,24 @@ using Microsoft.EntityFrameworkCore;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Http;
 
-namespace dotnet_core_api.Controllers {
+namespace dotnet_core_api.Controllers
+{
 
     // Ruta base para todos los endpoints /api/vendor/*
     [ApiController]
     [Route("api/vendor/")]
-    public class VendorController : ControllerBase {
+    public class VendorController : ControllerBase
+    {
 
-        private db_pamysContext db = new db_pamysContext();
-        
+        private DB_PAMYSContext db = new DB_PAMYSContext();
+
         [Route("all")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IEnumerable<Vendor>> getAll() {
-            return await Task.Run<IEnumerable<Vendor>>(() => { 
+        public async Task<IEnumerable<Vendor>> getAll()
+        {
+            return await Task.Run<IEnumerable<Vendor>>(() =>
+            {
                 return this.db.Vendors.ToList();
             });
         }
@@ -28,8 +32,10 @@ namespace dotnet_core_api.Controllers {
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Vendor>> getById(int id) {
-            return await Task.Run<ActionResult<Vendor>>(() => {
+        public async Task<ActionResult<Vendor>> getById(int id)
+        {
+            return await Task.Run<ActionResult<Vendor>>(() =>
+            {
                 var vendor = this.db.Vendors.Find(id);
                 if (vendor != null)
                     return Ok(vendor);
@@ -42,9 +48,11 @@ namespace dotnet_core_api.Controllers {
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Vendor>> getByCompany(string company) {
-            return await Task.Run<ActionResult<Vendor>>(() => {
-                var vendor = new  Vendor();
+        public async Task<ActionResult<Vendor>> getByCompany(string company)
+        {
+            return await Task.Run<ActionResult<Vendor>>(() =>
+            {
+                var vendor = new Vendor();
                 vendor = this.db.Vendors.ToList().Find((vendor) => vendor.Company == company);
                 if (vendor != null)
                     return Ok(vendor);
@@ -57,10 +65,12 @@ namespace dotnet_core_api.Controllers {
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> add(Vendor vendor) {
-            return await Task.Run<IActionResult>(() => {
-                if (vendor == null) 
-                    return BadRequest();                
+        public async Task<IActionResult> add(Vendor vendor)
+        {
+            return await Task.Run<IActionResult>(() =>
+            {
+                if (vendor == null)
+                    return BadRequest();
                 this.db.Vendors.Add(vendor);
                 this.db.SaveChanges();
                 return Created("/api/vendor", vendor);
@@ -71,17 +81,21 @@ namespace dotnet_core_api.Controllers {
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> update(Vendor vendor) {
+        public async Task<IActionResult> update(Vendor vendor)
+        {
             return await Task.Run<IActionResult>(() =>
-            {     
-                try {
+            {
+                try
+                {
                     var updateTask = this.db.Vendors.Update(vendor);
                     if (updateTask.State == EntityState.Modified)
                         this.db.SaveChanges();
                     return Ok();
-                }catch (DbUpdateConcurrencyException) {
+                }
+                catch (DbUpdateConcurrencyException)
+                {
                     return NotFound();
-                }             
+                }
             });
         }
 
@@ -89,14 +103,20 @@ namespace dotnet_core_api.Controllers {
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> delete(uint id) {         
-            return await Task.Run<IActionResult>(() => {
-                try {
-                    var deleteTask = this.db.Vendors.Remove(new Vendor(){Id=id});
+        public async Task<IActionResult> delete(uint id)
+        {
+            var vendor = this.db.Vendors.Find(id);
+            return await Task.Run<IActionResult>(() =>
+            {
+                try
+                {
+                    var deleteTask = this.db.Vendors.Remove(vendor);
                     if (deleteTask.State == EntityState.Deleted)
                         this.db.SaveChanges();
                     return Ok();
-                }catch (DbUpdateConcurrencyException) {                    
+                }
+                catch (DbUpdateConcurrencyException)
+                {
                     return NotFound();
                 }
             });
