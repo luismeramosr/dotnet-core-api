@@ -35,7 +35,7 @@ namespace dotnet_core_api.Models
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseMySql("server=localhost;database=db_pamys;user id=root", Microsoft.EntityFrameworkCore.ServerVersion.FromString("10.4.17-mariadb"));
+                optionsBuilder.UseMySql("Server=localhost;port=3306;Database=DB_PAMYS;User=root;Password=rpi75695118@192.168.1.200;TreatTinyAsBoolean=true;", Microsoft.EntityFrameworkCore.ServerVersion.FromString("10.4.17-mariadb"));
             }
         }
 
