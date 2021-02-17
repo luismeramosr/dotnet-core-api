@@ -11,11 +11,11 @@ using Microsoft.AspNetCore.Authorization;
 namespace dotnet_core_api.Controllers
 {
 
-    // Ruta base para todos los endpoints /api/category/*
+    // Ruta base para todos los endpoints /api/voucher/*
     [Authorize]
     [ApiController]
-    [Route("api/category/")]
-    public class CategoryController : ControllerBase
+    [Route("api/voucher/")]
+    public class VoucherController : ControllerBase
     {
 
         private DB_PAMYSContext db = new DB_PAMYSContext();
@@ -27,11 +27,11 @@ namespace dotnet_core_api.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IEnumerable<Category>> getAll()
+        public async Task<IEnumerable<Voucher>> getAll()
         {
-            return await Task.Run<IEnumerable<Category>>(() =>
+            return await Task.Run<IEnumerable<Voucher>>(() =>
             {
-                return this.db.Categorys.ToList();
+                return this.db.Vouchers.ToList();
             });
         }
 
@@ -39,13 +39,13 @@ namespace dotnet_core_api.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Category>> getById(int id)
+        public async Task<ActionResult<Voucher>> getById(int id)
         {
-            return await Task.Run<ActionResult<Category>>(() =>
+            return await Task.Run<ActionResult<Voucher>>(() =>
             {
-                var category = this.db.Categorys.Find(id);
-                if (category != null)
-                    return Ok(category);
+                var voucher = this.db.Vouchers.Find(id);
+                if (voucher != null)
+                    return Ok(voucher);
                 else
                     return NotFound();
             });
@@ -55,15 +55,15 @@ namespace dotnet_core_api.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Category>> save(Category category)
+        public async Task<ActionResult<Voucher>> save(Voucher voucher)
         {
-            return await Task.Run<ActionResult<Category>>(() =>
+            return await Task.Run<ActionResult<Voucher>>(() =>
             {
-                if (category == null)
+                if (voucher == null)
                     return BadRequest();
-                this.db.Categorys.Add(category);
+                this.db.Vouchers.Add(voucher);
                 this.db.SaveChanges();
-                return Ok(category);
+                return Ok(voucher);
             });
         }
 
@@ -71,16 +71,16 @@ namespace dotnet_core_api.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Category>> update(Category category)
+        public async Task<ActionResult<Voucher>> update(Voucher voucher)
         {
-            return await Task.Run<ActionResult<Category>>(() =>
+            return await Task.Run<ActionResult<Voucher>>(() =>
             {
                 try
                 {
-                    var updateTask = this.db.Categorys.Update(category);
+                    var updateTask = this.db.Vouchers.Update(voucher);
                     if (updateTask.State == EntityState.Modified)
                         this.db.SaveChanges();
-                    return Ok(category);
+                    return Ok(voucher);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -95,12 +95,12 @@ namespace dotnet_core_api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> delete(int id)
         {
-            var category = this.db.Categorys.Find(id);
+            var voucher = this.db.Vouchers.Find(id);
             return await Task.Run<IActionResult>(() =>
             {
                 try
                 {
-                    var deleteTask = this.db.Categorys.Remove(category);
+                    var deleteTask = this.db.Vouchers.Remove(voucher);
                     if (deleteTask.State == EntityState.Deleted)
                         this.db.SaveChanges();
                     return Ok();

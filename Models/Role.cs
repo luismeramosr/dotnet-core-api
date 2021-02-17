@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 #nullable disable
 
@@ -15,6 +16,7 @@ namespace dotnet_core_api.Models
         public int Id { get; set; }
         public string Name { get; set; }
 
+        [JsonIgnore]
         public virtual ICollection<Client> Clients { get; set; }
     }
 }

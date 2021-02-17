@@ -7,11 +7,13 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 
 namespace dotnet_core_api.Controllers
 {
 
     // Ruta base para todos los endpoints /api/product/*
+    [Authorize]
     [ApiController]
     [Route("api/product/")]
     public class ProductController : ControllerBase

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 #nullable disable
 
@@ -25,7 +26,8 @@ namespace dotnet_core_api.Models
         public int? ZipCode { get; set; }
         public string ProfilePictureUrl { get; set; }
 
-        public virtual Role IdRolNavigation { get; set; }
+        public virtual Role role { get; set; }
+        [JsonIgnore]
         public virtual ICollection<Order> Orders { get; set; }
     }
 }

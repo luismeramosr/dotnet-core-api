@@ -11,11 +11,11 @@ using Microsoft.AspNetCore.Authorization;
 namespace dotnet_core_api.Controllers
 {
 
-    // Ruta base para todos los endpoints /api/category/*
+    // Ruta base para todos los endpoints /api/order_details/*
     [Authorize]
     [ApiController]
-    [Route("api/category/")]
-    public class CategoryController : ControllerBase
+    [Route("api/order_details/")]
+    public class OrderDetailController : ControllerBase
     {
 
         private DB_PAMYSContext db = new DB_PAMYSContext();
@@ -27,11 +27,11 @@ namespace dotnet_core_api.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IEnumerable<Category>> getAll()
+        public async Task<IEnumerable<OrderDetail>> getAll()
         {
-            return await Task.Run<IEnumerable<Category>>(() =>
+            return await Task.Run<IEnumerable<OrderDetail>>(() =>
             {
-                return this.db.Categorys.ToList();
+                return this.db.OrderDetails.ToList();
             });
         }
 
@@ -39,13 +39,13 @@ namespace dotnet_core_api.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Category>> getById(int id)
+        public async Task<ActionResult<OrderDetail>> getById(int id)
         {
-            return await Task.Run<ActionResult<Category>>(() =>
+            return await Task.Run<ActionResult<OrderDetail>>(() =>
             {
-                var category = this.db.Categorys.Find(id);
-                if (category != null)
-                    return Ok(category);
+                var orderDetail = this.db.OrderDetails.Find(id);
+                if (orderDetail != null)
+                    return Ok(orderDetail);
                 else
                     return NotFound();
             });
@@ -55,15 +55,15 @@ namespace dotnet_core_api.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Category>> save(Category category)
+        public async Task<ActionResult<OrderDetail>> save(OrderDetail orderDetail)
         {
-            return await Task.Run<ActionResult<Category>>(() =>
+            return await Task.Run<ActionResult<OrderDetail>>(() =>
             {
-                if (category == null)
+                if (orderDetail == null)
                     return BadRequest();
-                this.db.Categorys.Add(category);
+                this.db.OrderDetails.Add(orderDetail);
                 this.db.SaveChanges();
-                return Ok(category);
+                return Ok(orderDetail);
             });
         }
 
@@ -71,16 +71,16 @@ namespace dotnet_core_api.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Category>> update(Category category)
+        public async Task<ActionResult<OrderDetail>> update(OrderDetail orderDetail)
         {
-            return await Task.Run<ActionResult<Category>>(() =>
+            return await Task.Run<ActionResult<OrderDetail>>(() =>
             {
                 try
                 {
-                    var updateTask = this.db.Categorys.Update(category);
+                    var updateTask = this.db.OrderDetails.Update(orderDetail);
                     if (updateTask.State == EntityState.Modified)
                         this.db.SaveChanges();
-                    return Ok(category);
+                    return Ok(orderDetail);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -95,12 +95,12 @@ namespace dotnet_core_api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> delete(int id)
         {
-            var category = this.db.Categorys.Find(id);
+            var orderDetail = this.db.OrderDetails.Find(id);
             return await Task.Run<IActionResult>(() =>
             {
                 try
                 {
-                    var deleteTask = this.db.Categorys.Remove(category);
+                    var deleteTask = this.db.OrderDetails.Remove(orderDetail);
                     if (deleteTask.State == EntityState.Deleted)
                         this.db.SaveChanges();
                     return Ok();

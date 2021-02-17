@@ -11,11 +11,11 @@ using Microsoft.AspNetCore.Authorization;
 namespace dotnet_core_api.Controllers
 {
 
-    // Ruta base para todos los endpoints /api/category/*
+    // Ruta base para todos los endpoints /api/payment_type/*
     [Authorize]
     [ApiController]
-    [Route("api/category/")]
-    public class CategoryController : ControllerBase
+    [Route("api/payment_type/")]
+    public class PaymentTypeController : ControllerBase
     {
 
         private DB_PAMYSContext db = new DB_PAMYSContext();
@@ -27,11 +27,11 @@ namespace dotnet_core_api.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IEnumerable<Category>> getAll()
+        public async Task<IEnumerable<PaymentType>> getAll()
         {
-            return await Task.Run<IEnumerable<Category>>(() =>
+            return await Task.Run<IEnumerable<PaymentType>>(() =>
             {
-                return this.db.Categorys.ToList();
+                return this.db.PaymentTypes.ToList();
             });
         }
 
@@ -39,13 +39,13 @@ namespace dotnet_core_api.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Category>> getById(int id)
+        public async Task<ActionResult<PaymentType>> getById(int id)
         {
-            return await Task.Run<ActionResult<Category>>(() =>
+            return await Task.Run<ActionResult<PaymentType>>(() =>
             {
-                var category = this.db.Categorys.Find(id);
-                if (category != null)
-                    return Ok(category);
+                var paymentType = this.db.PaymentTypes.Find(id);
+                if (paymentType != null)
+                    return Ok(paymentType);
                 else
                     return NotFound();
             });
@@ -55,15 +55,15 @@ namespace dotnet_core_api.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Category>> save(Category category)
+        public async Task<ActionResult<PaymentType>> save(PaymentType paymentType)
         {
-            return await Task.Run<ActionResult<Category>>(() =>
+            return await Task.Run<ActionResult<PaymentType>>(() =>
             {
-                if (category == null)
+                if (paymentType == null)
                     return BadRequest();
-                this.db.Categorys.Add(category);
+                this.db.PaymentTypes.Add(paymentType);
                 this.db.SaveChanges();
-                return Ok(category);
+                return Ok(paymentType);
             });
         }
 
@@ -71,16 +71,16 @@ namespace dotnet_core_api.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Category>> update(Category category)
+        public async Task<ActionResult<PaymentType>> update(PaymentType paymentType)
         {
-            return await Task.Run<ActionResult<Category>>(() =>
+            return await Task.Run<ActionResult<PaymentType>>(() =>
             {
                 try
                 {
-                    var updateTask = this.db.Categorys.Update(category);
+                    var updateTask = this.db.PaymentTypes.Update(paymentType);
                     if (updateTask.State == EntityState.Modified)
                         this.db.SaveChanges();
-                    return Ok(category);
+                    return Ok(paymentType);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -95,12 +95,12 @@ namespace dotnet_core_api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> delete(int id)
         {
-            var category = this.db.Categorys.Find(id);
+            var paymentType = this.db.PaymentTypes.Find(id);
             return await Task.Run<IActionResult>(() =>
             {
                 try
                 {
-                    var deleteTask = this.db.Categorys.Remove(category);
+                    var deleteTask = this.db.PaymentTypes.Remove(paymentType);
                     if (deleteTask.State == EntityState.Deleted)
                         this.db.SaveChanges();
                     return Ok();

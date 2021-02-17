@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using dotnet_core_api.Config;
 using dotnet_core_api.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -12,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
@@ -31,6 +35,24 @@ namespace dotnet_core_api
         {
 
             services.AddControllers();
+            var key = "pamys2021xD$123/rpi@192.168.1.200@zapateria-pamys.ml";
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(x =>
+            {
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key)),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            });
+            services.AddSingleton<IJwtAuthManager>(new JwtAuthManager(key));
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "dotnet_core_api", Version = "v1" });
@@ -49,9 +71,11 @@ namespace dotnet_core_api
             .EnableSensitiveDataLogging()
             .EnableDetailedErrors()
             );
-            services.AddCors(options => {
-                options.AddPolicy("default", 
-                    builder => {
+            services.AddCors(options =>
+            {
+                options.AddPolicy("default",
+                    builder =>
+                    {
                         builder.WithOrigins("http://localhost:4200");
                         builder.AllowAnyMethod();
                     });
@@ -70,13 +94,11 @@ namespace dotnet_core_api
 
             app.UseHttpsRedirection();
             app.UseRouting();
+            app.UseAuthentication();
             app.UseAuthorization();
             app.UseCors("default");
-            
             app.UseEndpoints(endpoints =>
-            {   
-                endpoints.MapControllers();                
-            });
+            { endpoints.MapControllers(); });
         }
     }
 }

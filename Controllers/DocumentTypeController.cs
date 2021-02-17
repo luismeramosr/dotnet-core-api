@@ -11,11 +11,11 @@ using Microsoft.AspNetCore.Authorization;
 namespace dotnet_core_api.Controllers
 {
 
-    // Ruta base para todos los endpoints /api/category/*
+    // Ruta base para todos los endpoints /api/document_type/*
     [Authorize]
     [ApiController]
-    [Route("api/category/")]
-    public class CategoryController : ControllerBase
+    [Route("api/document_type/")]
+    public class DocumentTypeController : ControllerBase
     {
 
         private DB_PAMYSContext db = new DB_PAMYSContext();
@@ -27,11 +27,11 @@ namespace dotnet_core_api.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IEnumerable<Category>> getAll()
+        public async Task<IEnumerable<DocumentType>> getAll()
         {
-            return await Task.Run<IEnumerable<Category>>(() =>
+            return await Task.Run<IEnumerable<DocumentType>>(() =>
             {
-                return this.db.Categorys.ToList();
+                return this.db.DocumentTypes.ToList();
             });
         }
 
@@ -39,13 +39,13 @@ namespace dotnet_core_api.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Category>> getById(int id)
+        public async Task<ActionResult<DocumentType>> getById(int id)
         {
-            return await Task.Run<ActionResult<Category>>(() =>
+            return await Task.Run<ActionResult<DocumentType>>(() =>
             {
-                var category = this.db.Categorys.Find(id);
-                if (category != null)
-                    return Ok(category);
+                var doctype = this.db.DocumentTypes.Find(id);
+                if (doctype != null)
+                    return Ok(doctype);
                 else
                     return NotFound();
             });
@@ -55,15 +55,15 @@ namespace dotnet_core_api.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Category>> save(Category category)
+        public async Task<ActionResult<DocumentType>> save(DocumentType doctype)
         {
-            return await Task.Run<ActionResult<Category>>(() =>
+            return await Task.Run<ActionResult<DocumentType>>(() =>
             {
-                if (category == null)
+                if (doctype == null)
                     return BadRequest();
-                this.db.Categorys.Add(category);
+                this.db.DocumentTypes.Add(doctype);
                 this.db.SaveChanges();
-                return Ok(category);
+                return Ok(doctype);
             });
         }
 
@@ -71,16 +71,16 @@ namespace dotnet_core_api.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Category>> update(Category category)
+        public async Task<ActionResult<DocumentType>> update(DocumentType doctype)
         {
-            return await Task.Run<ActionResult<Category>>(() =>
+            return await Task.Run<ActionResult<DocumentType>>(() =>
             {
                 try
                 {
-                    var updateTask = this.db.Categorys.Update(category);
+                    var updateTask = this.db.DocumentTypes.Update(doctype);
                     if (updateTask.State == EntityState.Modified)
                         this.db.SaveChanges();
-                    return Ok(category);
+                    return Ok(doctype);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -95,12 +95,12 @@ namespace dotnet_core_api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> delete(int id)
         {
-            var category = this.db.Categorys.Find(id);
+            var doctype = this.db.DocumentTypes.Find(id);
             return await Task.Run<IActionResult>(() =>
             {
                 try
                 {
-                    var deleteTask = this.db.Categorys.Remove(category);
+                    var deleteTask = this.db.DocumentTypes.Remove(doctype);
                     if (deleteTask.State == EntityState.Deleted)
                         this.db.SaveChanges();
                     return Ok();
