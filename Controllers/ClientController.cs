@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using Microsoft.Extensions.Configuration;
+using dotnet_core_api.env;
 using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
@@ -6,8 +8,10 @@ using dotnet_core_api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+// necesario para el webroot
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-
+using dotnet_core_api.utilities;
 namespace dotnet_core_api.Controllers
 {
     [Authorize]
@@ -15,7 +19,16 @@ namespace dotnet_core_api.Controllers
     [Route("api/client/")]
     public class ClientController : ControllerBase
     {
-
+        public PhotoUtilities photoUtilities = new PhotoUtilities();
+        private readonly IConfiguration _configuration;
+        public static IWebHostEnvironment _webHostEnvironment;
+        private EnviromentApp env;
+        public ClientController(IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
+        {
+            _configuration = configuration;//instancio la configuracion
+            _webHostEnvironment = webHostEnvironment;
+            this.env = new EnviromentApp(_webHostEnvironment, _configuration); // se la paso a mi modelo con las constantes
+        }
         private DB_PAMYSContext db = new DB_PAMYSContext();
 
         // Todos los endpoints son funciones asincronas, para mejorar
@@ -113,6 +126,36 @@ namespace dotnet_core_api.Controllers
                 }
             });
         }
+
+        // upload image client
+        [Route("photos/upload")]
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<Client>> uploadPhotoClient([FromForm] IFormFile imgFile, [FromForm] int idClient)
+        {
+            return await Task.Run<ActionResult<Client>>(async () =>
+            {
+                var clientCurrent = this.db.Clients.Find(idClient);
+                // existe un cliente y la imgfile almenos algo
+                if (clientCurrent != null || imgFile.Length != 0)
+                {
+                    string path = this.env.pathClientPhotos;
+                    // nombre copio el archivo y retorna el namefile
+                    string nameFileEncript = await this.photoUtilities.copyPhoto(imgFile, path);
+                    //elimina el archivo si existe
+                    await this.photoUtilities.removePhoto(clientCurrent.ProfilePictureUrl, path);
+                    // guardo en la bd
+                    clientCurrent.ProfilePictureUrl = nameFileEncript;
+                    clientCurrent.role = this.db.Roles.Find(clientCurrent.IdRol);
+                    this.db.SaveChanges();
+                    return Ok(clientCurrent);
+                }
+                return BadRequest();
+
+            });
+        }
+
 
     }
 }

@@ -91,7 +91,8 @@ namespace dotnet_core_api
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "dotnet_core_api v1"));
             }
-
+            
+            app.UseStaticFiles(); //activo el uso de wwwroot como carpeta publica
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseAuthentication();
