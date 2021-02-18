@@ -10,7 +10,7 @@ namespace dotnet_core_api.Models
     {
         public Order()
         {
-            OrderDetails = new HashSet<OrderDetail>();
+            products = new HashSet<OrderDetail>();
         }
 
         public int Id { get; set; }
@@ -27,17 +27,11 @@ namespace dotnet_core_api.Models
         public double? Total { get; set; }
         public int? ZipCode { get; set; }
 
-        [JsonIgnore]
-        public virtual Client IdClientNavigation { get; set; }
-        [JsonIgnore]
-        public virtual DocumentType IdDocumentTypeNavigation { get; set; }
-        [JsonIgnore]
-        public virtual OrderStatus IdOrderStatusNavigation { get; set; }
-        [JsonIgnore]
-        public virtual PaymentType IdPaymentStatusNavigation { get; set; }
-        [JsonIgnore]
-        public virtual Voucher IdVoucherNavigation { get; set; }
-        [JsonIgnore]
-        public virtual ICollection<OrderDetail> OrderDetails { get; set; }
+        public virtual Client client { get; set; }
+        public virtual DocumentType documentType { get; set; }
+        public virtual OrderStatus orderStatus { get; set; }
+        public virtual PaymentType paymentType { get; set; }
+        public virtual Voucher voucher { get; set; }
+        public virtual ICollection<OrderDetail> products { get; set; }
     }
 }

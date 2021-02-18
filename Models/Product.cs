@@ -10,7 +10,7 @@ namespace dotnet_core_api.Models
         public Product()
         {
             OrderDetails = new HashSet<OrderDetail>();
-            ProductImages = new HashSet<ProductImage>();
+            productsImages = new HashSet<ProductImage>();
         }
 
         public int IdProduct { get; set; }
@@ -29,9 +29,9 @@ namespace dotnet_core_api.Models
 
         public virtual Category category { get; set; }
         public virtual Vendor vendor { get; set; }
-        
+
         [JsonIgnore]
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }
-        public virtual ICollection<ProductImage> ProductImages { get; set; }
+        public virtual ICollection<ProductImage> productsImages { get; set; }
     }
 }

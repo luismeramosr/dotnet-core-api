@@ -221,27 +221,27 @@ namespace dotnet_core_api.Models
                     .HasColumnType("int(11)")
                     .HasColumnName("zip_code");
 
-                entity.HasOne(d => d.IdClientNavigation)
+                entity.HasOne(d => d.client)
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.IdClient)
                     .HasConstraintName("FK7qtjfyw39780y67hhk1cq58wl");
 
-                entity.HasOne(d => d.IdDocumentTypeNavigation)
+                entity.HasOne(d => d.documentType)
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.IdDocumentType)
                     .HasConstraintName("FKhtvn3gkhqh1uc70qp2fnhd6qd");
 
-                entity.HasOne(d => d.IdOrderStatusNavigation)
+                entity.HasOne(d => d.orderStatus)
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.IdOrderStatus)
                     .HasConstraintName("FKbp6k71rsko970ooke8me82k9");
 
-                entity.HasOne(d => d.IdPaymentStatusNavigation)
+                entity.HasOne(d => d.paymentType)
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.IdPaymentStatus)
                     .HasConstraintName("FK4xx58ik5qol72gccuhnpbq29m");
 
-                entity.HasOne(d => d.IdVoucherNavigation)
+                entity.HasOne(d => d.voucher)
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.IdVoucher)
                     .HasConstraintName("FKk2a9incs212uvouc7oh3g4782");
@@ -249,7 +249,7 @@ namespace dotnet_core_api.Models
 
             modelBuilder.Entity<OrderDetail>(entity =>
             {
-                entity.HasKey(e => new { e.IdOrder, e.IdProduct })
+                entity.HasKey(e => e.IdOrder)
                     .HasName("PRIMARY")
                     .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0 });
 
@@ -271,13 +271,13 @@ namespace dotnet_core_api.Models
                     .HasColumnType("int(11)")
                     .HasColumnName("quantity");
 
-                entity.HasOne(d => d.IdOrderNavigation)
-                    .WithMany(p => p.OrderDetails)
+                entity.HasOne(d => d.order)
+                    .WithMany(p => p.products)
                     .HasForeignKey(d => d.IdOrder)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK6h10g6el6eyicu33ddse0gm3v");
 
-                entity.HasOne(d => d.IdProductNavigation)
+                entity.HasOne(d => d.product)
                     .WithMany(p => p.OrderDetails)
                     .HasForeignKey(d => d.IdProduct)
                     .OnDelete(DeleteBehavior.ClientSetNull)
@@ -411,7 +411,7 @@ namespace dotnet_core_api.Models
                     .HasCollation("utf8mb4_0900_ai_ci");
 
                 entity.HasOne(d => d.IdProductNavigation)
-                    .WithMany(p => p.ProductImages)
+                    .WithMany(p => p.productsImages)
                     .HasForeignKey(d => d.IdProduct)
                     .HasConstraintName("FKpbcjehp1361qtyyilvx87d26d");
             });

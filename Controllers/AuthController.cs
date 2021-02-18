@@ -3,9 +3,8 @@ using dotnet_core_api.Models;
 using dotnet_core_api.Config;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using System;
-using System.Net.Mime;
 using Microsoft.AspNetCore.Http;
+using System.Net.Mime;
 
 namespace dotnet_core_api.Controllers
 {

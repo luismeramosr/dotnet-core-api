@@ -61,7 +61,9 @@ namespace dotnet_core_api.Controllers
                     return BadRequest();
                 this.db.Clients.Add(client);
                 this.db.SaveChanges();
-                return Ok(client);
+                var newClient = client;
+                newClient.role = this.db.Roles.Find(newClient.IdRol);
+                return Ok(newClient);
             });
         }
 
@@ -78,6 +80,8 @@ namespace dotnet_core_api.Controllers
                     var updateTask = this.db.Clients.Update(client);
                     if (updateTask.State == EntityState.Modified)
                         this.db.SaveChanges();
+                    var updatedClient = client;
+                    updatedClient.role = this.db.Roles.Find(updatedClient.IdRol);
                     return Ok(client);
                 }
                 catch (DbUpdateConcurrencyException)

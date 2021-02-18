@@ -33,7 +33,7 @@ namespace dotnet_core_api.Controllers
                   {
                       product.category = this.db.Categorys.Find(product.IdCategory);
                       product.vendor = this.db.Vendors.Find(product.IdVendor);
-                      product.ProductImages = this.db.ProductImages.Where(e => e.IdProduct == product.IdProduct).ToList();
+                      product.productsImages = this.db.ProductImages.Where(e => e.IdProduct == product.IdProduct).ToList();
                   });
                 return products;
             });
@@ -55,7 +55,7 @@ namespace dotnet_core_api.Controllers
                   {
                       product.category = this.db.Categorys.Find(product.IdCategory);
                       product.vendor = this.db.Vendors.Find(product.IdVendor);
-                      product.ProductImages = this.db.ProductImages.Where(e => e.IdProduct == product.IdProduct).ToList();
+                      product.productsImages = this.db.ProductImages.Where(e => e.IdProduct == product.IdProduct).ToList();
                   });
                     return Ok(products);
                 }
@@ -73,7 +73,7 @@ namespace dotnet_core_api.Controllers
                 var product = this.db.Products.Find(id);
                 product.category = this.db.Categorys.Find(product.IdCategory);
                 product.vendor = this.db.Vendors.Find(product.IdVendor);
-                product.ProductImages = this.db.ProductImages.Where(e => e.IdProduct == id).ToList();
+                product.productsImages = this.db.ProductImages.Where(e => e.IdProduct == id).ToList();
                 if (product != null)
                     return Ok(product);
                 else
@@ -96,13 +96,33 @@ namespace dotnet_core_api.Controllers
                   {
                       product.category = this.db.Categorys.Find(product.IdCategory);
                       product.vendor = this.db.Vendors.Find(product.IdVendor);
-                      product.ProductImages = this.db.ProductImages.Where(e => e.IdProduct == product.IdProduct).ToList();
+                      product.productsImages = this.db.ProductImages.Where(e => e.IdProduct == product.IdProduct).ToList();
                   });
                     return Ok(products);
                 }
                 return NotFound();
             });
         }
+
+        [HttpGet("search/{slug}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<Product>> getBySlug(string slug)
+        {
+            return await Task.Run<ActionResult<Product>>(() =>
+            {
+                Product product = this.db.Products.Where((product) => product.Slug == slug).FirstOrDefault();
+                if (product != null)
+                {
+                    product.category = this.db.Categorys.Find(product.IdCategory);
+                    product.vendor = this.db.Vendors.Find(product.IdVendor);
+                    product.productsImages = this.db.ProductImages.Where(e => e.IdProduct == product.IdProduct).ToList();
+                    return Ok(product);
+                }
+                return NotFound();
+            });
+        }
+
 
         [HttpPost]
         [Consumes(MediaTypeNames.Application.Json)]
@@ -120,7 +140,7 @@ namespace dotnet_core_api.Controllers
                 this.db.SaveChanges();
                 product.category = this.db.Categorys.Find(product.IdCategory);
                 product.vendor = this.db.Vendors.Find(product.IdVendor);
-                product.ProductImages = this.db.ProductImages.Where(e => e.IdProduct == product.IdProduct).ToList();
+                product.productsImages = this.db.ProductImages.Where(e => e.IdProduct == product.IdProduct).ToList();
                 return Ok(product);
             });
         }
@@ -152,7 +172,7 @@ namespace dotnet_core_api.Controllers
                     this.db.SaveChanges();
                     currentProduct.category = this.db.Categorys.Find(product.IdCategory);
                     currentProduct.vendor = this.db.Vendors.Find(product.IdVendor);
-                    currentProduct.ProductImages = this.db.ProductImages.Where(e => e.IdProduct == product.IdProduct).ToList();
+                    currentProduct.productsImages = this.db.ProductImages.Where(e => e.IdProduct == product.IdProduct).ToList();
                     return Ok(currentProduct);
                 }
                 catch (DbUpdateException)
