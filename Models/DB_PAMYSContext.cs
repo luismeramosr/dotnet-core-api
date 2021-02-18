@@ -34,7 +34,7 @@ namespace dotnet_core_api.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseMySql("server=localhost;port=3306;database=DB_PAMYS;user=root;password=rpi75695118@192.168.1.200;treattinyasboolean=true", Microsoft.EntityFrameworkCore.ServerVersion.FromString("8.0.13-mysql"));
+                optionsBuilder.UseMySql("server=localhost;port=3307;database=DB_PAMYS;user=root;password=root;treattinyasboolean=true", Microsoft.EntityFrameworkCore.ServerVersion.FromString("8.0.13-mysql"));
             }
         }
 

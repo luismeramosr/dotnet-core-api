@@ -9,6 +9,11 @@ using System.Net.Mime;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
 
+// necesarios para upload
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using dotnet_core_api.env;
+using dotnet_core_api.utilities;
 namespace dotnet_core_api.Controllers
 {
 
@@ -18,7 +23,16 @@ namespace dotnet_core_api.Controllers
     [Route("api/product/")]
     public class ProductController : ControllerBase
     {
-
+        public PhotoUtilities photoUtilities = new PhotoUtilities();
+        private readonly IConfiguration _configuration;
+        public static IWebHostEnvironment _webHostEnvironment;
+        private EnviromentApp env;
+        public ProductController(IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
+        {
+            _configuration = configuration;//instancio la configuracion
+            _webHostEnvironment = webHostEnvironment;
+            this.env = new EnviromentApp(_webHostEnvironment, _configuration); // se la paso a mi modelo con las constantes
+        }
         private DB_PAMYSContext db = new DB_PAMYSContext();
 
         [Route("all")]
@@ -206,5 +220,33 @@ namespace dotnet_core_api.Controllers
             });
         }
 
+
+        // upload image client
+        [Route("photos/upload")]
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<Product>> uploadPhotoClient([FromForm] IFormFile imgFile, [FromForm] int idProduct)
+        {
+            return await Task.Run<ActionResult<Product>>(async () =>
+            {
+                var productCurrent = this.db.Products.Find(idProduct);
+                // existe un cliente y la imgfile almenos algo
+                if (productCurrent != null || imgFile.Length != 0)
+                {
+                    string path = this.env.pathProductsThumbnailPhotos;
+                    // nombre copio el archivo y retorna el namefile
+                    string nameFileEncript = await this.photoUtilities.copyPhoto(imgFile, path);
+                    //elimina el archivo si existe
+                    await this.photoUtilities.removePhoto(productCurrent.ThumbnailUrl, path);
+                    // guardo en la bd
+                    productCurrent.ThumbnailUrl = nameFileEncript;
+                    this.db.SaveChanges();
+                    return Ok(productCurrent);
+                }
+                return BadRequest();
+
+            });
+        }
     }
 }

@@ -8,8 +8,14 @@ using System.Net.Mime;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
 
+// necesarios para upload
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using dotnet_core_api.env;
+using dotnet_core_api.utilities;
 namespace dotnet_core_api.Controllers
 {
+
 
     // Ruta base para todos los endpoints /api/product_images/*
     [Authorize]
@@ -17,7 +23,16 @@ namespace dotnet_core_api.Controllers
     [Route("api/product_images/")]
     public class ProductImagesController : ControllerBase
     {
-
+        public PhotoUtilities photoUtilities = new PhotoUtilities();
+        private readonly IConfiguration _configuration;
+        public static IWebHostEnvironment _webHostEnvironment;
+        private EnviromentApp env;
+        public ProductImagesController(IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
+        {
+            _configuration = configuration;//instancio la configuracion
+            _webHostEnvironment = webHostEnvironment;
+            this.env = new EnviromentApp(_webHostEnvironment, _configuration); // se la paso a mi modelo con las constantes
+        }
         private DB_PAMYSContext db = new DB_PAMYSContext();
 
         // Todos los endpoints son funciones asincronas, para mejorar
@@ -112,5 +127,49 @@ namespace dotnet_core_api.Controllers
             });
         }
 
+        // upload image client
+        [Route("photos/upload")]
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<IEnumerable<ProductImage>>> uploadPhotoClient([FromForm] IFormFile[] imgFile, [FromForm] int idProduct)
+        {
+            return await Task.Run<ActionResult<IEnumerable<ProductImage>>>(async () =>
+            {
+                var productImagesList = this.db.ProductImages.Where(e => e.IdProduct == idProduct);
+                // existe un cliente y la imgfile almenos algo
+                if (imgFile.Length != 0)
+                {
+                    string path = this.env.pathProductsPhotos;
+                    if (productImagesList != null)
+                    {
+                        // recorro cada imagen y la elimino
+                        await productImagesList.ForEachAsync(async (e) =>
+                        {
+                            this.db.ProductImages.Remove(e);
+                            await this.photoUtilities.removePhoto(e.Url, path);
+                        });
+                        this.db.SaveChanges();
+                    }
+                    // guardo en cascada las imagenes relacionadas
+                    for (int i = 0; i < imgFile.Length; i++)
+                    {
+                        string nameFileEncript = "";
+                        nameFileEncript = await this.photoUtilities.copyPhoto(imgFile[i], path);
+                        // guardo en la bd
+                        var productImageNew = new ProductImage();
+                        productImageNew.IdProduct = idProduct;
+                        productImageNew.Url = nameFileEncript;
+                        this.db.ProductImages.Add(productImageNew);
+                        this.db.SaveChanges();
+                    }
+
+                    var productImagesUpdated = this.db.ProductImages.Where(e => e.IdProduct == idProduct);
+                    return Ok(productImagesUpdated);
+                }
+                return BadRequest();
+
+            });
+        }
     }
 }
