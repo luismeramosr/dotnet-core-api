@@ -1,9 +1,11 @@
+using dotnet_core_api.Models;
+
 namespace dotnet_core_api.Config
 {
 
     public interface IJwtAuthManager
     {
-        object Authenticate(string username, string password);
+        AuthResponse Authenticate(string username, string password);
     }
 
 }

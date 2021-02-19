@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System;
+using Microsoft.EntityFrameworkCore;
 
 namespace dotnet_core_api.Config
 {
@@ -21,17 +22,16 @@ namespace dotnet_core_api.Config
         }
 
 
-        public object Authenticate(string username, string password)
+        public AuthResponse Authenticate(string username, string password)
         {
-            Client user = this.db.Clients
-                .Where(e => (e.Username == username)).FirstOrDefault();
+            Client user = this.db.Clients.AsNoTracking().Where(e => e.username == username).FirstOrDefault();
 
             if (user == null)
             {
                 return null;
             }
 
-            if (bcrypt.verifyPassword(password, user.Password))
+            if (bcrypt.verifyPassword(password, user.password))
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var tokenKey = Encoding.ASCII.GetBytes(key);
@@ -47,7 +47,7 @@ namespace dotnet_core_api.Config
                                 SecurityAlgorithms.HmacSha256Signature)
                 };
                 var token = tokenHandler.CreateToken(tokenDescriptor);
-                user.role = this.db.Roles.Find(user.IdRol);
+                user.role = this.db.Roles.Find(user.idRol);
                 return new AuthResponse { jwt = tokenHandler.WriteToken(token), user = user };
             }
             else

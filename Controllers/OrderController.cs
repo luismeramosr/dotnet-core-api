@@ -31,7 +31,27 @@ namespace dotnet_core_api.Controllers
         {
             return await Task.Run<IEnumerable<Order>>(() =>
             {
-                return this.db.Orders.ToList();
+                List<Order> orders = this.db.Orders.AsNoTracking().ToList();
+                orders.ForEach(o =>
+                {
+                    o.client = this.db.Clients.Find(o.idClient);
+                    o.documentType = this.db.DocumentTypes.Find(o.idDocumentType);
+                    o.orderStatus = this.db.OrderStatuses.Find(o.idOrderStatus);
+                    o.paymentType = this.db.PaymentTypes.Find(o.idPaymentStatus);
+                    Voucher orderVoucher = this.db.Vouchers.Find(o.idVoucher);
+                    if (orderVoucher != null)
+                    {
+                        o.voucher = orderVoucher;
+                    }
+                    List<OrderDetail> products = this.db.OrderDetails.Where(d => d.id.idOrder == o.idOrder).ToList();
+                    products.ForEach(p =>
+                    {
+                        p.id = new OrderDetailsPK { idOrder = p.idOrder, idProduct = p.idProduct };
+                        p.product = this.db.Products.Find(p.idProduct);
+                    });
+                    o.products = products;
+                });
+                return orders;
             });
         }
 

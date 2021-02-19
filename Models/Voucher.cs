@@ -13,14 +13,14 @@ namespace dotnet_core_api.Models
             Orders = new HashSet<Order>();
         }
 
-        public int Id { get; set; }
-        public double? Amount { get; set; }
-        public int? IdClient { get; set; }
-        public int? IdClientAccount { get; set; }
-        public int? IdOperation { get; set; }
-        public int? IdStoreAccount { get; set; }
-        public string ImageUrl { get; set; }
-        public DateTime? CreatedAt { get; set; }
+        public int idVoucher { get; set; }
+        public double? amount { get; set; }
+        public int? idClient { get; set; }
+        public int? idClientAccount { get; set; }
+        public int? idOperation { get; set; }
+        public int? idStoreAccount { get; set; }
+        public string imageUrl { get; set; }
+        public DateTime? paymentDate { get; set; }
 
         [JsonIgnore]
         public virtual ICollection<Order> Orders { get; set; }

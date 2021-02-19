@@ -12,6 +12,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using dotnet_core_api.utilities;
+using dotnet_core_api.Config;
+using System;
+
 namespace dotnet_core_api.Controllers
 {
     [Authorize]
@@ -30,7 +33,7 @@ namespace dotnet_core_api.Controllers
             this.env = new EnviromentApp(_webHostEnvironment, _configuration); // se la paso a mi modelo con las constantes
         }
         private DB_PAMYSContext db = new DB_PAMYSContext();
-
+        private Encription bcrypt = new Encription();
         // Todos los endpoints son funciones asincronas, para mejorar
         // el performance, aun falta ver una manera de retornar los estados http
         // y validar errores.
@@ -42,7 +45,13 @@ namespace dotnet_core_api.Controllers
         {
             return await Task.Run<IEnumerable<Client>>(() =>
             {
-                return this.db.Clients.ToList();
+                List<Client> clients = (List<Client>)this.db.Clients.AsNoTracking().ToList();
+                clients.ForEach(c =>
+                {
+                    c.role = this.db.Roles.Find(c.idRol);
+                });
+
+                return clients;
             });
         }
 
@@ -54,7 +63,8 @@ namespace dotnet_core_api.Controllers
         {
             return await Task.Run<ActionResult<Client>>(() =>
             {
-                var client = this.db.Clients.Find(id);
+                Client client = this.db.Clients.Find(id);
+                client.role = this.db.Roles.Find(client.idRol);
                 if (client != null)
                     return Ok(client);
                 else
@@ -75,7 +85,7 @@ namespace dotnet_core_api.Controllers
                 this.db.Clients.Add(client);
                 this.db.SaveChanges();
                 var newClient = client;
-                newClient.role = this.db.Roles.Find(newClient.IdRol);
+                newClient.role = this.db.Roles.Find(newClient.idRol);
                 return Ok(newClient);
             });
         }
@@ -90,11 +100,11 @@ namespace dotnet_core_api.Controllers
             {
                 try
                 {
-                    var updateTask = this.db.Clients.Update(client);
-                    if (updateTask.State == EntityState.Modified)
-                        this.db.SaveChanges();
-                    var updatedClient = client;
-                    updatedClient.role = this.db.Roles.Find(updatedClient.IdRol);
+                    Client oldClient = client;
+                    oldClient.password = bcrypt.hashPassword(client.password);
+                    oldClient.role = this.db.Roles.Find(client.idRol);
+                    this.db.Clients.Update(oldClient);
+                    this.db.SaveChanges();
                     return Ok(client);
                 }
                 catch (DbUpdateConcurrencyException)
@@ -136,7 +146,8 @@ namespace dotnet_core_api.Controllers
         {
             return await Task.Run<ActionResult<Client>>(async () =>
             {
-                var clientCurrent = this.db.Clients.Find(idClient);
+                Console.WriteLine(string.Format("ID: {0}", idClient));
+                Client clientCurrent = this.db.Clients.AsNoTracking().Where(e => e.idClient == idClient).FirstOrDefault();
                 // existe un cliente y la imgfile almenos algo
                 if (clientCurrent != null || imgFile.Length != 0)
                 {
@@ -144,10 +155,11 @@ namespace dotnet_core_api.Controllers
                     // nombre copio el archivo y retorna el namefile
                     string nameFileEncript = await this.photoUtilities.copyPhoto(imgFile, path);
                     //elimina el archivo si existe
-                    await this.photoUtilities.removePhoto(clientCurrent.ProfilePictureUrl, path);
+                    await this.photoUtilities.removePhoto(clientCurrent.profilePictureUrl, path);
                     // guardo en la bd
-                    clientCurrent.ProfilePictureUrl = nameFileEncript;
-                    clientCurrent.role = this.db.Roles.Find(clientCurrent.IdRol);
+                    clientCurrent.profilePictureUrl = nameFileEncript;
+                    clientCurrent.role = this.db.Roles.Find(clientCurrent.idRol);
+                    this.db.Clients.Update(clientCurrent);
                     this.db.SaveChanges();
                     return Ok(clientCurrent);
                 }

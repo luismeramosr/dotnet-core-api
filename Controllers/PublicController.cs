@@ -27,7 +27,7 @@ namespace dotnet_core_api.Controllers
             return await Task.Run<ActionResult<Client>>(() =>
             {
                 Client newClient = client;
-                newClient.Password = bcrypt.hashPassword(newClient.Password);
+                newClient.password = bcrypt.hashPassword(newClient.password);
                 this.db.Clients.Add(newClient);
                 this.db.SaveChanges();
                 return Ok(client);
@@ -74,7 +74,7 @@ namespace dotnet_core_api.Controllers
             });
         }
 
-        [HttpGet("product/search/{slug}")]
+        [HttpGet("product/slug/{slug}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<Product>> getBySlug(string slug)

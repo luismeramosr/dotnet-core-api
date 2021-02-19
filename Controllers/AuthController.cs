@@ -28,9 +28,11 @@ namespace dotnet_core_api.Controllers
         {
             return await Task.Run<ActionResult<AuthResponse>>(() =>
             {
-                var result = this.jwtAuthManager.Authenticate(userCred.username, userCred.password);
+                AuthResponse result = (AuthResponse)this.jwtAuthManager.Authenticate(userCred.username, userCred.password);
                 if (result != null)
+                {
                     return Ok(result);
+                }
                 else
                     return NotFound();
             });

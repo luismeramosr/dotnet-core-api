@@ -22,15 +22,15 @@ namespace dotnet_core_api.env
         }
         public void habilityVaribles()
         {
-            this.pathVouchersPhotos = this.getPathAbsolute("pathVouchersPhotos");
-            this.pathClientPhotos = this.getPathAbsolute("pathClientPhotos");
-            this.pathProductsPhotos = this.getPathAbsolute("pathProductsPhotos");
-            this.pathProductsThumbnailPhotos = this.getPathAbsolute("pathProductsThumbnailPhotos");
+            this.pathVouchersPhotos = this.getRelativePath("pathVouchersPhotos");
+            this.pathClientPhotos = this.getRelativePath("pathClientPhotos");
+            this.pathProductsPhotos = this.getRelativePath("pathProductsPhotos");
+            this.pathProductsThumbnailPhotos = this.getRelativePath("pathProductsThumbnailPhotos");
         }
 
-        public string getPathAbsolute(string pathAppJson)
+        public string getRelativePath(string pathAppJson)
         {
-            return this._webHostEnvironment.WebRootPath + this.pathGeneral + this._configuration.GetValue<string>(pathAppJson) + "/";
+            return "./" + this.pathGeneral + this._configuration.GetValue<string>(pathAppJson) + "/";
         }
     }
 }

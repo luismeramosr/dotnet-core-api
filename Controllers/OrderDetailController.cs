@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
+using System;
 
 namespace dotnet_core_api.Controllers
 {
@@ -34,9 +35,8 @@ namespace dotnet_core_api.Controllers
                 var orderDetail = this.db.OrderDetails.ToList();
                 orderDetail.ForEach(e =>
                 {
-                    e.id = new OrderDetailsPK { idOrder = e.IdOrder, idProduct = e.IdProduct };
-                    e.product = this.db.Products.Find(e.IdProduct);
-                    e.product.productsImages = this.db.ProductImages.Where(p => p.IdProduct == e.IdProduct).ToList();
+                    e.id = new OrderDetailsPK { idOrder = e.idOrder, idProduct = e.idProduct };
+                    e.product = this.db.Products.Find(e.idProduct);
                 });
                 return orderDetail;
             });
@@ -54,11 +54,11 @@ namespace dotnet_core_api.Controllers
 
                 if (orderDetail != null)
                 {
-                    orderDetail.id = new OrderDetailsPK { idOrder = orderDetail.IdOrder, idProduct = orderDetail.IdProduct };
-                    orderDetail.product = this.db.Products.Find(orderDetail.IdProduct);
+                    orderDetail.id = new OrderDetailsPK { idOrder = orderDetail.idOrder, idProduct = orderDetail.idProduct };
+                    orderDetail.product = this.db.Products.Find(orderDetail.idProduct);
                     orderDetail.product.category = this.db.Categorys.Find(orderDetail.product.IdCategory);
                     orderDetail.product.vendor = this.db.Vendors.Find(orderDetail.product.IdVendor);
-                    orderDetail.product.productsImages = this.db.ProductImages.Where(e => e.IdProduct == orderDetail.IdProduct).ToList();
+                    orderDetail.product.productsImages = this.db.ProductImages.Where(e => e.IdProduct == orderDetail.idProduct).ToList();
                     return Ok(orderDetail);
                 }
                 else
@@ -74,15 +74,16 @@ namespace dotnet_core_api.Controllers
         {
             return await Task.Run<ActionResult<OrderDetail>>(() =>
             {
+                Console.WriteLine(string.Format("idOrder: {0}, idProduct: {1}, quantity: {2}", orderDetail.idOrder, orderDetail.idProduct, orderDetail.quantity));
                 if (orderDetail == null)
                     return BadRequest();
                 this.db.OrderDetails.Add(orderDetail);
                 this.db.SaveChanges();
-                orderDetail.id = new OrderDetailsPK { idOrder = orderDetail.IdOrder, idProduct = orderDetail.IdProduct };
-                orderDetail.product = this.db.Products.Find(orderDetail.IdProduct);
+                orderDetail.id = new OrderDetailsPK { idOrder = orderDetail.idOrder, idProduct = orderDetail.idProduct };
+                orderDetail.product = this.db.Products.Find(orderDetail.idProduct);
                 orderDetail.product.category = this.db.Categorys.Find(orderDetail.product.IdCategory);
                 orderDetail.product.vendor = this.db.Vendors.Find(orderDetail.product.IdVendor);
-                orderDetail.product.productsImages = this.db.ProductImages.Where(e => e.IdProduct == orderDetail.IdProduct).ToList();
+                orderDetail.product.productsImages = this.db.ProductImages.Where(e => e.IdProduct == orderDetail.idProduct).ToList();
                 return Ok(orderDetail);
             });
         }
@@ -100,11 +101,11 @@ namespace dotnet_core_api.Controllers
                     var updateTask = this.db.OrderDetails.Update(orderDetail);
                     if (updateTask.State == EntityState.Modified)
                         this.db.SaveChanges();
-                    orderDetail.id = new OrderDetailsPK { idOrder = orderDetail.IdOrder, idProduct = orderDetail.IdProduct };
-                    orderDetail.product = this.db.Products.Find(orderDetail.IdProduct);
+                    orderDetail.id = new OrderDetailsPK { idOrder = orderDetail.idOrder, idProduct = orderDetail.idProduct };
+                    orderDetail.product = this.db.Products.Find(orderDetail.idProduct);
                     orderDetail.product.category = this.db.Categorys.Find(orderDetail.product.IdCategory);
                     orderDetail.product.vendor = this.db.Vendors.Find(orderDetail.product.IdVendor);
-                    orderDetail.product.productsImages = this.db.ProductImages.Where(e => e.IdProduct == orderDetail.IdProduct).ToList();
+                    orderDetail.product.productsImages = this.db.ProductImages.Where(e => e.IdProduct == orderDetail.idProduct).ToList();
                     return Ok(orderDetail);
                 }
                 catch (DbUpdateConcurrencyException)

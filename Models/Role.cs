@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 #nullable disable
@@ -13,8 +12,8 @@ namespace dotnet_core_api.Models
             Clients = new HashSet<Client>();
         }
 
-        public int Id { get; set; }
-        public string Name { get; set; }
+        public int idRole { get; set; }
+        public string name { get; set; }
 
         [JsonIgnore]
         public virtual ICollection<Client> Clients { get; set; }

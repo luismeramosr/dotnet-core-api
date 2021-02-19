@@ -1,6 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 #nullable disable
 
@@ -8,6 +7,7 @@ namespace dotnet_core_api.Models
 {
     public partial class DB_PAMYSContext : DbContext
     {
+
         public DB_PAMYSContext()
         {
         }
@@ -70,75 +70,77 @@ namespace dotnet_core_api.Models
             {
                 entity.ToTable("clients");
 
-                entity.HasIndex(e => e.IdRol, "FKfo9aws26amofdlkjpw2hit7ne");
+                entity.HasIndex(e => e.idRol, "FKfo9aws26amofdlkjpw2hit7ne");
 
-                entity.Property(e => e.Id)
+                entity.HasKey(e => e.idClient);
+
+                entity.Property(e => e.idClient)
                     .HasColumnType("int(11)")
                     .HasColumnName("id");
 
-                entity.Property(e => e.Active)
+                entity.Property(e => e.active)
                     .HasColumnType("bit(1)")
                     .HasColumnName("active");
 
-                entity.Property(e => e.Address)
+                entity.Property(e => e.address)
                     .HasColumnType("varchar(100)")
                     .HasColumnName("address")
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
-                entity.Property(e => e.Email)
+                entity.Property(e => e.email)
                     .HasColumnType("varchar(45)")
                     .HasColumnName("email")
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
-                entity.Property(e => e.FirstName)
+                entity.Property(e => e.firstName)
                     .HasColumnType("varchar(45)")
                     .HasColumnName("first_name")
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
-                entity.Property(e => e.IdRol)
+                entity.Property(e => e.idRol)
                     .HasColumnType("int(11)")
                     .HasColumnName("id_rol");
 
-                entity.Property(e => e.LastName)
+                entity.Property(e => e.lastName)
                     .HasColumnType("varchar(45)")
                     .HasColumnName("last_name")
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
-                entity.Property(e => e.Password)
+                entity.Property(e => e.password)
                     .HasColumnType("varchar(100)")
                     .HasColumnName("_password")
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
-                entity.Property(e => e.Phone)
+                entity.Property(e => e.phone)
                     .HasColumnType("varchar(9)")
                     .HasColumnName("phone")
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
-                entity.Property(e => e.ProfilePictureUrl)
+                entity.Property(e => e.profilePictureUrl)
                     .HasColumnType("varchar(200)")
                     .HasColumnName("profile_picture_url")
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
-                entity.Property(e => e.Username)
+                entity.Property(e => e.username)
                     .HasColumnType("varchar(30)")
                     .HasColumnName("username")
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
-                entity.Property(e => e.ZipCode)
+                entity.Property(e => e.zip_code)
                     .HasColumnType("int(11)")
                     .HasColumnName("zip_code");
 
                 entity.HasOne(d => d.role)
                     .WithMany(p => p.Clients)
-                    .HasForeignKey(d => d.IdRol)
+                    .HasForeignKey(d => d.idRol)
                     .HasConstraintName("FKfo9aws26amofdlkjpw2hit7ne");
             });
 
@@ -146,11 +148,13 @@ namespace dotnet_core_api.Models
             {
                 entity.ToTable("document_types");
 
-                entity.Property(e => e.Id)
+                entity.HasKey(e => e.idDocumentType);
+
+                entity.Property(e => e.idDocumentType)
                     .HasColumnType("int(11)")
                     .HasColumnName("id");
 
-                entity.Property(e => e.Doctype)
+                entity.Property(e => e.doctype)
                     .HasColumnType("varchar(20)")
                     .HasColumnName("doctype")
                     .HasCharSet("utf8mb4")
@@ -161,138 +165,145 @@ namespace dotnet_core_api.Models
             {
                 entity.ToTable("orders");
 
-                entity.HasIndex(e => e.IdPaymentStatus, "FK4xx58ik5qol72gccuhnpbq29m");
+                entity.HasIndex(e => e.idPaymentStatus, "FK4xx58ik5qol72gccuhnpbq29m");
 
-                entity.HasIndex(e => e.IdClient, "FK7qtjfyw39780y67hhk1cq58wl");
+                entity.HasIndex(e => e.idClient, "FK7qtjfyw39780y67hhk1cq58wl");
 
-                entity.HasIndex(e => e.IdOrderStatus, "FKbp6k71rsko970ooke8me82k9");
+                entity.HasIndex(e => e.idOrderStatus, "FKbp6k71rsko970ooke8me82k9");
 
-                entity.HasIndex(e => e.IdDocumentType, "FKhtvn3gkhqh1uc70qp2fnhd6qd");
+                entity.HasIndex(e => e.idDocumentType, "FKhtvn3gkhqh1uc70qp2fnhd6qd");
 
-                entity.HasIndex(e => e.IdVoucher, "FKk2a9incs212uvouc7oh3g4782");
+                entity.HasIndex(e => e.idVoucher, "FKk2a9incs212uvouc7oh3g4782");
 
-                entity.Property(e => e.Id)
+                entity.HasKey(e => e.idOrder);
+
+                entity.Property(e => e.idOrder)
                     .HasColumnType("int(11)")
                     .HasColumnName("id");
 
-                entity.Property(e => e.Comment)
+                entity.Property(e => e.comment)
                     .HasColumnType("varchar(150)")
                     .HasColumnName("comment")
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
-                entity.Property(e => e.DateCreated)
+                entity.Property(e => e.dateCreated)
                     .HasMaxLength(6)
                     .HasColumnName("date_created");
 
-                entity.Property(e => e.IdClient)
+                entity.Property(e => e.idClient)
                     .HasColumnType("int(11)")
                     .HasColumnName("id_client");
 
-                entity.Property(e => e.IdDocumentType)
+                entity.Property(e => e.idDocumentType)
                     .HasColumnType("int(11)")
                     .HasColumnName("id_document_type");
 
-                entity.Property(e => e.IdOrderStatus)
+                entity.Property(e => e.idOrderStatus)
                     .HasColumnType("int(11)")
                     .HasColumnName("id_order_status");
 
-                entity.Property(e => e.IdPaymentStatus)
+                entity.Property(e => e.idPaymentStatus)
                     .HasColumnType("int(11)")
                     .HasColumnName("id_payment_status");
 
-                entity.Property(e => e.IdVoucher)
+                entity.Property(e => e.idVoucher)
                     .HasColumnType("int(11)")
                     .HasColumnName("id_voucher");
 
-                entity.Property(e => e.Igv).HasColumnName("igv");
+                entity.Property(e => e.igv).HasColumnName("igv");
 
-                entity.Property(e => e.ShippingAddress)
+                entity.Property(e => e.shippingAddress)
                     .HasColumnType("varchar(100)")
                     .HasColumnName("shipping_address")
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
-                entity.Property(e => e.Subtotal).HasColumnName("subtotal");
+                entity.Property(e => e.subtotal).HasColumnName("subtotal");
 
-                entity.Property(e => e.Total).HasColumnName("total");
+                entity.Property(e => e.total).HasColumnName("total");
 
-                entity.Property(e => e.ZipCode)
+                entity.Property(e => e.zipCode)
                     .HasColumnType("int(11)")
                     .HasColumnName("zip_code");
 
                 entity.HasOne(d => d.client)
                     .WithMany(p => p.Orders)
-                    .HasForeignKey(d => d.IdClient)
+                    .HasForeignKey(d => d.idClient)
                     .HasConstraintName("FK7qtjfyw39780y67hhk1cq58wl");
 
                 entity.HasOne(d => d.documentType)
                     .WithMany(p => p.Orders)
-                    .HasForeignKey(d => d.IdDocumentType)
+                    .HasForeignKey(d => d.idDocumentType)
                     .HasConstraintName("FKhtvn3gkhqh1uc70qp2fnhd6qd");
 
                 entity.HasOne(d => d.orderStatus)
                     .WithMany(p => p.Orders)
-                    .HasForeignKey(d => d.IdOrderStatus)
+                    .HasForeignKey(d => d.idOrderStatus)
                     .HasConstraintName("FKbp6k71rsko970ooke8me82k9");
 
                 entity.HasOne(d => d.paymentType)
                     .WithMany(p => p.Orders)
-                    .HasForeignKey(d => d.IdPaymentStatus)
+                    .HasForeignKey(d => d.idPaymentStatus)
                     .HasConstraintName("FK4xx58ik5qol72gccuhnpbq29m");
 
                 entity.HasOne(d => d.voucher)
                     .WithMany(p => p.Orders)
-                    .HasForeignKey(d => d.IdVoucher)
+                    .HasForeignKey(d => d.idVoucher)
                     .HasConstraintName("FKk2a9incs212uvouc7oh3g4782");
             });
 
             modelBuilder.Entity<OrderDetail>(entity =>
             {
-                entity.HasKey(e => e.IdOrder)
+                entity.HasKey(e => new { e.idOrder, e.idProduct })
                     .HasName("PRIMARY")
                     .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0 });
 
                 entity.ToTable("order_details");
 
-                entity.HasIndex(e => e.IdProduct, "FK41ypdnsfa4cd6poqkbthg94nc");
+                entity.HasIndex(e => e.idProduct, "FK41ypdnsfa4cd6poqkbthg94nc");
 
-                entity.Property(e => e.IdOrder)
+                entity.Property(e => e.idOrder)
                     .HasColumnType("int(11)")
                     .HasColumnName("id_order");
 
-                entity.Property(e => e.IdProduct)
+                entity.Property(e => e.idProduct)
                     .HasColumnType("int(11)")
                     .HasColumnName("id_product");
 
-                entity.Property(e => e.Price).HasColumnName("price");
+                entity.Property(e => e.price)
+                    .HasColumnType("varchar(20)")
+                    .HasColumnName("price");
 
-                entity.Property(e => e.Quantity)
+                entity.Property(e => e.quantity)
                     .HasColumnType("int(11)")
                     .HasColumnName("quantity");
 
                 entity.HasOne(d => d.order)
                     .WithMany(p => p.products)
-                    .HasForeignKey(d => d.IdOrder)
+                    .HasForeignKey(d => d.idOrder)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK6h10g6el6eyicu33ddse0gm3v");
 
                 entity.HasOne(d => d.product)
                     .WithMany(p => p.OrderDetails)
-                    .HasForeignKey(d => d.IdProduct)
+                    .HasForeignKey(d => d.idProduct)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK41ypdnsfa4cd6poqkbthg94nc");
+
             });
 
             modelBuilder.Entity<OrderStatus>(entity =>
             {
                 entity.ToTable("order_status");
 
-                entity.Property(e => e.Id)
+                entity.HasKey(e => e.idOrderStatus);
+
+                entity.Property(e => e.idOrderStatus)
                     .HasColumnType("int(11)")
                     .HasColumnName("id");
 
-                entity.Property(e => e.Status)
+                entity.Property(e => e.status)
                     .HasColumnType("varchar(20)")
                     .HasColumnName("status")
                     .HasCharSet("utf8mb4")
@@ -303,11 +314,13 @@ namespace dotnet_core_api.Models
             {
                 entity.ToTable("payment_types");
 
-                entity.Property(e => e.Id)
+                entity.HasKey(e => e.idPaymentType);
+
+                entity.Property(e => e.idPaymentType)
                     .HasColumnType("int(11)")
                     .HasColumnName("id");
 
-                entity.Property(e => e.Type)
+                entity.Property(e => e.type)
                     .HasColumnType("varchar(50)")
                     .HasColumnName("type")
                     .HasCharSet("utf8mb4")
@@ -420,11 +433,13 @@ namespace dotnet_core_api.Models
             {
                 entity.ToTable("roles");
 
-                entity.Property(e => e.Id)
+                entity.HasKey(e => e.idRole);
+
+                entity.Property(e => e.idRole)
                     .HasColumnType("int(11)")
                     .HasColumnName("id");
 
-                entity.Property(e => e.Name)
+                entity.Property(e => e.name)
                     .HasColumnType("varchar(15)")
                     .HasColumnName("name")
                     .HasCharSet("utf8mb4")
@@ -457,33 +472,35 @@ namespace dotnet_core_api.Models
             {
                 entity.ToTable("vouchers");
 
-                entity.Property(e => e.Id)
+                entity.HasKey(e => e.idVoucher);
+
+                entity.Property(e => e.idVoucher)
                     .HasColumnType("int(11)")
                     .HasColumnName("id");
 
-                entity.Property(e => e.Amount).HasColumnName("amount");
+                entity.Property(e => e.amount).HasColumnName("amount");
 
-                entity.Property(e => e.CreatedAt)
+                entity.Property(e => e.paymentDate)
                     .HasColumnType("date")
                     .HasColumnName("created_at");
 
-                entity.Property(e => e.IdClient)
+                entity.Property(e => e.idClient)
                     .HasColumnType("int(11)")
                     .HasColumnName("id_client");
 
-                entity.Property(e => e.IdClientAccount)
+                entity.Property(e => e.idClientAccount)
                     .HasColumnType("int(11)")
                     .HasColumnName("id_client_account");
 
-                entity.Property(e => e.IdOperation)
+                entity.Property(e => e.idOperation)
                     .HasColumnType("int(11)")
                     .HasColumnName("id_operation");
 
-                entity.Property(e => e.IdStoreAccount)
+                entity.Property(e => e.idStoreAccount)
                     .HasColumnType("int(11)")
                     .HasColumnName("id_store_account");
 
-                entity.Property(e => e.ImageUrl)
+                entity.Property(e => e.imageUrl)
                     .HasColumnType("varchar(300)")
                     .HasColumnName("image_url")
                     .HasCharSet("utf8mb4")

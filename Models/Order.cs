@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 #nullable disable
 
@@ -13,19 +12,19 @@ namespace dotnet_core_api.Models
             products = new HashSet<OrderDetail>();
         }
 
-        public int Id { get; set; }
-        public string Comment { get; set; }
-        public DateTime? DateCreated { get; set; }
-        public int? IdClient { get; set; }
-        public int? IdDocumentType { get; set; }
-        public int? IdOrderStatus { get; set; }
-        public int? IdPaymentStatus { get; set; }
-        public int? IdVoucher { get; set; }
-        public double? Igv { get; set; }
-        public string ShippingAddress { get; set; }
-        public double? Subtotal { get; set; }
-        public double? Total { get; set; }
-        public int? ZipCode { get; set; }
+        public int idOrder { get; set; }
+        public string comment { get; set; }
+        public DateTime? dateCreated { get; set; }
+        public int? idClient { get; set; }
+        public int? idDocumentType { get; set; }
+        public int? idOrderStatus { get; set; }
+        public int? idPaymentStatus { get; set; }
+        public int? idVoucher { get; set; }
+        public double? igv { get; set; }
+        public string shippingAddress { get; set; }
+        public double? subtotal { get; set; }
+        public double? total { get; set; }
+        public int? zipCode { get; set; }
 
         public virtual Client client { get; set; }
         public virtual DocumentType documentType { get; set; }
