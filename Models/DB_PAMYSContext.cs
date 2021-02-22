@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
 #nullable disable
 
@@ -272,7 +271,7 @@ namespace dotnet_core_api.Models
                     .HasColumnName("id_product");
 
                 entity.Property(e => e.price)
-                    .HasColumnType("varchar(20)")
+                    .HasColumnType("decimal()")
                     .HasColumnName("price");
 
                 entity.Property(e => e.quantity)

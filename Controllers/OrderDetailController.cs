@@ -13,7 +13,7 @@ namespace dotnet_core_api.Controllers
 {
 
     // Ruta base para todos los endpoints /api/order_details/*
-    [Authorize]
+    [AllowAnonymous]
     [ApiController]
     [Route("api/order_details/")]
     public class OrderDetailController : ControllerBase
@@ -28,17 +28,22 @@ namespace dotnet_core_api.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IEnumerable<OrderDetail>> getAll()
+        public async Task<IEnumerable<OrderDetailCustom>> getAll()
         {
-            return await Task.Run<IEnumerable<OrderDetail>>(() =>
+            return await Task.Run<IEnumerable<OrderDetailCustom>>(() =>
             {
-                var orderDetail = this.db.OrderDetails.ToList();
-                orderDetail.ForEach(e =>
+                List<OrderDetail> orderDetails = this.db.OrderDetails.ToList();
+                List<OrderDetailCustom> result = new List<OrderDetailCustom>();
+                orderDetails.ForEach(e =>
                 {
-                    e.id = new OrderDetailsPK { idOrder = e.idOrder, idProduct = e.idProduct };
-                    e.product = this.db.Products.Find(e.idProduct);
+                    result.Add(new OrderDetailCustom
+                    {
+                        id = new OrderDetailsPK { idOrder = e.idOrder, idProduct = e.idProduct },
+                        quantity = e.quantity,
+                        product = this.db.Products.Find(e.idProduct)
+                    });
                 });
-                return orderDetail;
+                return result;
             });
         }
 
@@ -46,20 +51,25 @@ namespace dotnet_core_api.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<OrderDetail>> getById(int id)
+        public async Task<ActionResult<OrderDetailCustom>> getById(int id)
         {
-            return await Task.Run<ActionResult<OrderDetail>>(() =>
+            return await Task.Run<ActionResult<OrderDetailCustom>>(() =>
             {
-                var orderDetail = this.db.OrderDetails.Find(id);
+                List<OrderDetail> orderDetails = (List<OrderDetail>)this.db.OrderDetails.Where(e => e.idOrder == id).ToList();
+                List<OrderDetailCustom> result = new List<OrderDetailCustom>();
 
-                if (orderDetail != null)
+                if (orderDetails.Count() > 0)
                 {
-                    orderDetail.id = new OrderDetailsPK { idOrder = orderDetail.idOrder, idProduct = orderDetail.idProduct };
-                    orderDetail.product = this.db.Products.Find(orderDetail.idProduct);
-                    orderDetail.product.category = this.db.Categorys.Find(orderDetail.product.IdCategory);
-                    orderDetail.product.vendor = this.db.Vendors.Find(orderDetail.product.IdVendor);
-                    orderDetail.product.productsImages = this.db.ProductImages.Where(e => e.IdProduct == orderDetail.idProduct).ToList();
-                    return Ok(orderDetail);
+                    orderDetails.ForEach(od =>
+                    {
+                        result.Add(new OrderDetailCustom
+                        {
+                            id = new OrderDetailsPK { idOrder = od.idOrder, idProduct = od.idProduct },
+                            quantity = od.quantity,
+                            product = this.db.Products.Find(od.idProduct)
+                        });
+                    });
+                    return Ok(result);
                 }
                 else
                     return NotFound();
@@ -70,42 +80,53 @@ namespace dotnet_core_api.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<OrderDetail>> save(OrderDetail orderDetail)
+        public async Task<ActionResult<OrderDetailCustom>> save(OrderDetail orderDetail)
         {
-            return await Task.Run<ActionResult<OrderDetail>>(() =>
+            return await Task.Run<ActionResult<OrderDetailCustom>>(() =>
             {
-                Console.WriteLine(string.Format("idOrder: {0}, idProduct: {1}, quantity: {2}", orderDetail.idOrder, orderDetail.idProduct, orderDetail.quantity));
                 if (orderDetail == null)
                     return BadRequest();
+
                 this.db.OrderDetails.Add(orderDetail);
                 this.db.SaveChanges();
-                orderDetail.id = new OrderDetailsPK { idOrder = orderDetail.idOrder, idProduct = orderDetail.idProduct };
-                orderDetail.product = this.db.Products.Find(orderDetail.idProduct);
-                orderDetail.product.category = this.db.Categorys.Find(orderDetail.product.IdCategory);
-                orderDetail.product.vendor = this.db.Vendors.Find(orderDetail.product.IdVendor);
-                orderDetail.product.productsImages = this.db.ProductImages.Where(e => e.IdProduct == orderDetail.idProduct).ToList();
-                return Ok(orderDetail);
+                OrderDetailCustom od = new OrderDetailCustom
+                {
+                    id = new OrderDetailsPK { idOrder = orderDetail.idOrder, idProduct = orderDetail.idProduct },
+                    quantity = orderDetail.quantity,
+                    product = this.db.Products.Find(orderDetail.idProduct)
+                };
+
+                return Ok(od);
             });
         }
 
         [HttpPut]
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<OrderDetail>> update(OrderDetail orderDetail)
+        public async Task<ActionResult<OrderDetailCustom>> update(OrderDetailCustom orderDetail)
         {
-            return await Task.Run<ActionResult<OrderDetail>>(() =>
+            return await Task.Run<ActionResult<OrderDetailCustom>>(() =>
             {
                 try
                 {
-                    var updateTask = this.db.OrderDetails.Update(orderDetail);
+                    if (orderDetail == null)
+                        return BadRequest();
+                    OrderDetail od = new OrderDetail
+                    {
+                        idOrder = orderDetail.id.idOrder,
+                        idProduct = orderDetail.id.idProduct,
+                        quantity = orderDetail.quantity
+                    };
+                    var updateTask = this.db.OrderDetails.Update(od);
                     if (updateTask.State == EntityState.Modified)
                         this.db.SaveChanges();
-                    orderDetail.id = new OrderDetailsPK { idOrder = orderDetail.idOrder, idProduct = orderDetail.idProduct };
-                    orderDetail.product = this.db.Products.Find(orderDetail.idProduct);
+                    orderDetail.id = new OrderDetailsPK { idOrder = od.idOrder, idProduct = od.idProduct };
+                    orderDetail.product = this.db.Products.Find(od.idProduct);
                     orderDetail.product.category = this.db.Categorys.Find(orderDetail.product.IdCategory);
                     orderDetail.product.vendor = this.db.Vendors.Find(orderDetail.product.IdVendor);
-                    orderDetail.product.productsImages = this.db.ProductImages.Where(e => e.IdProduct == orderDetail.idProduct).ToList();
+                    orderDetail.product.productsImages = this.db.ProductImages.Where(e => e.IdProduct == orderDetail.id.idProduct).ToList();
                     return Ok(orderDetail);
                 }
                 catch (DbUpdateConcurrencyException)

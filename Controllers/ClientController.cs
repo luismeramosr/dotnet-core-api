@@ -80,6 +80,7 @@ namespace dotnet_core_api.Controllers
         {
             return await Task.Run<ActionResult<Client>>(() =>
             {
+                client.idRol = 1;
                 if (client == null)
                     return BadRequest();
                 this.db.Clients.Add(client);

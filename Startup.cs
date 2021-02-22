@@ -89,6 +89,7 @@ namespace dotnet_core_api
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "dotnet_core_api v1"));
             }
 
+            app.UseCors("default");
             app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new PhysicalFileProvider(
@@ -100,7 +101,6 @@ namespace dotnet_core_api
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseCors("default");
             app.UseEndpoints(endpoints =>
             { endpoints.MapControllers(); });
         }

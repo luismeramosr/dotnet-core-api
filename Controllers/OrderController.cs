@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
+using System;
 
 namespace dotnet_core_api.Controllers
 {
@@ -27,31 +28,50 @@ namespace dotnet_core_api.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IEnumerable<Order>> getAll()
+        public async Task<IEnumerable<OrderCustom>> getAll()
         {
-            return await Task.Run<IEnumerable<Order>>(() =>
+            return await Task.Run<IEnumerable<OrderCustom>>(() =>
             {
                 List<Order> orders = this.db.Orders.AsNoTracking().ToList();
+                List<OrderCustom> result = new List<OrderCustom>();
                 orders.ForEach(o =>
                 {
-                    o.client = this.db.Clients.Find(o.idClient);
-                    o.documentType = this.db.DocumentTypes.Find(o.idDocumentType);
-                    o.orderStatus = this.db.OrderStatuses.Find(o.idOrderStatus);
-                    o.paymentType = this.db.PaymentTypes.Find(o.idPaymentStatus);
                     Voucher orderVoucher = this.db.Vouchers.Find(o.idVoucher);
-                    if (orderVoucher != null)
-                    {
-                        o.voucher = orderVoucher;
-                    }
-                    List<OrderDetail> products = this.db.OrderDetails.Where(d => d.id.idOrder == o.idOrder).ToList();
+                    List<OrderDetail> products = this.db.OrderDetails.Where(d => d.idOrder == o.idOrder).ToList();
+                    List<OrderDetailCustom> od_result = new List<OrderDetailCustom>();
                     products.ForEach(p =>
                     {
-                        p.id = new OrderDetailsPK { idOrder = p.idOrder, idProduct = p.idProduct };
-                        p.product = this.db.Products.Find(p.idProduct);
+                        od_result.Add(new OrderDetailCustom
+                        {
+                            id = new OrderDetailsPK { idOrder = p.idOrder, idProduct = p.idProduct },
+                            quantity = p.quantity,
+                            product = this.db.Products.Find(p.idProduct)
+                        });
                     });
-                    o.products = products;
+                    result.Add(new OrderCustom
+                    {
+                        idOrder = o.idOrder,
+                        comment = o.comment,
+                        dateCreated = o.dateCreated,
+                        idClient = o.idClient,
+                        idDocumentType = o.idDocumentType,
+                        idOrderStatus = o.idOrderStatus,
+                        idPaymentStatus = o.idPaymentStatus,
+                        idVoucher = o.idVoucher,
+                        igv = o.igv,
+                        shippingAddress = o.shippingAddress,
+                        subtotal = o.subtotal,
+                        total = o.total,
+                        zipCode = o.zipCode,
+                        client = this.db.Clients.Find(o.idClient),
+                        documentType = this.db.DocumentTypes.Find(o.idDocumentType),
+                        orderStatus = this.db.OrderStatuses.Find(o.idOrderStatus),
+                        paymentType = this.db.PaymentTypes.Find(o.idPaymentStatus),
+                        voucher = orderVoucher != null ? orderVoucher : null,
+                        products = od_result
+                    });
                 });
-                return orders;
+                return result;
             });
         }
 
@@ -91,13 +111,47 @@ namespace dotnet_core_api.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Order>> update(Order order)
+        public async Task<ActionResult<OrderCustom>> update(OrderCustom order)
         {
-            return await Task.Run<ActionResult<Order>>(() =>
+            return await Task.Run<ActionResult<OrderCustom>>(() =>
             {
                 try
                 {
-                    var updateTask = this.db.Orders.Update(order);
+                    List<OrderDetailCustom> detailsCustom = (List<OrderDetailCustom>)order.products;
+                    List<OrderDetail> prods = new List<OrderDetail>();
+                    detailsCustom.ForEach(dc =>
+                    {
+                        prods.Add(new OrderDetail
+                        {
+                            idOrder = dc.id.idOrder,
+                            idProduct = dc.id.idProduct,
+                            quantity = dc.quantity,
+                            product = this.db.Products.Find(dc.id.idProduct)
+                        });
+                    });
+                    Order updatedOrder = new Order
+                    {
+                        idOrder = order.idOrder,
+                        comment = order.comment,
+                        dateCreated = order.dateCreated,
+                        idClient = order.idClient,
+                        idDocumentType = order.idDocumentType,
+                        idOrderStatus = order.idOrderStatus,
+                        idPaymentStatus = order.idPaymentStatus,
+                        idVoucher = order.idVoucher,
+                        igv = order.igv,
+                        shippingAddress = order.shippingAddress,
+                        subtotal = order.subtotal,
+                        total = order.total,
+                        zipCode = order.zipCode,
+                        client = order.client,
+                        documentType = order.documentType,
+                        orderStatus = order.orderStatus,
+                        paymentType = order.paymentType,
+                        voucher = order.voucher,
+                        products = prods
+                    };
+                    var updateTask = this.db.Orders.Update(updatedOrder);
                     if (updateTask.State == EntityState.Modified)
                         this.db.SaveChanges();
                     return Ok(order);
