@@ -26,7 +26,7 @@ namespace dotnet_core_api.Config
         {
             Client user = this.db.Clients.AsNoTracking().Where(e => e.username == username).FirstOrDefault();
 
-            if (user == null)
+            if (user == null || user.active == 0)
             {
                 return null;
             }

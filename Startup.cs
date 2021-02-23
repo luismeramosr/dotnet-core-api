@@ -72,7 +72,7 @@ namespace dotnet_core_api
                 options.AddPolicy("default",
                     builder =>
                     {
-                        builder.WithOrigins("http://localhost:4200");
+                        builder.AllowAnyOrigin();
                         builder.AllowAnyHeader();
                         builder.AllowAnyMethod();
                     });

@@ -76,16 +76,14 @@ namespace dotnet_core_api.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Client>> save(Client client)
+        public async Task<ActionResult<Client>> save([FromBody] Client client)
         {
             return await Task.Run<ActionResult<Client>>(() =>
             {
-                client.idRol = 1;
-                if (client == null)
-                    return BadRequest();
+                Client newClient = client;
+                newClient.password = bcrypt.hashPassword(client.password);
                 this.db.Clients.Add(client);
                 this.db.SaveChanges();
-                var newClient = client;
                 newClient.role = this.db.Roles.Find(newClient.idRol);
                 return Ok(newClient);
             });
