@@ -13,7 +13,7 @@ namespace dotnet_core_api.Controllers
 {
 
     // Ruta base para todos los endpoints /api/order_details/*
-    [AllowAnonymous]
+    [Authorize]
     [ApiController]
     [Route("api/order_details/")]
     public class OrderDetailController : ControllerBase

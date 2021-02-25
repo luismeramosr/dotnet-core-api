@@ -200,21 +200,23 @@ namespace dotnet_core_api.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> delete(uint id)
+        public async Task<IActionResult> delete(int id)
         {
             var currentProduct = this.db.Products.Find(id);
+            var productsImages = this.db.ProductImages.Where(e => e.IdProduct == id);
 
-            return await Task.Run<IActionResult>(() =>
+            return await Task.Run<IActionResult>(async () =>
             {
                 try
                 {
+                    await productsImages.ForEachAsync(e => this.db.ProductImages.Remove(e));
                     var deleteTask = this.db.Products.Remove(currentProduct);
-                    if (deleteTask.State == EntityState.Deleted)
-                        this.db.SaveChanges();
+                    this.db.SaveChanges();
                     return Ok();
                 }
-                catch (DbUpdateException)
+                catch (DbUpdateException err)
                 {
+                    Console.WriteLine(err.InnerException.Message);
                     return NotFound();
                 }
             });
